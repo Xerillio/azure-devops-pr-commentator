@@ -4,6 +4,9 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  - group: 'Publish extension DEV'
+
 steps:
 - task: Npm@1
   inputs:
