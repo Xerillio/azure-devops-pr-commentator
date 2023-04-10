@@ -16,7 +16,7 @@ steps:
 - task: Npm@1
   inputs:
     command: custom
-    customCommand: package-dev
+    customCommand: 'run package-dev'
   displayName: 'npm run package-dev'
 
 - task: QueryAzureDevOpsExtensionVersion@4
