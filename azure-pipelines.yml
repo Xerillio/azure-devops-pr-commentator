@@ -23,15 +23,6 @@ steps:
     customCommand: 'run package-dev'
   displayName: 'npm run package-dev'
 
-- task: QueryAzureDevOpsExtensionVersion@4
-  name: QueryVersion
-  inputs:
-    connectTo: 'VsTeam'
-    connectedServiceName: 'MarketplaceServiceConnection'
-    publisherId: '$(PublisherID)'
-    extensionId: '$(ExtensionID)'
-    versionAction: 'Patch' # Increase patch version
-
 - task: PackageAzureDevOpsExtension@4
   inputs:
     rootFolder: '$(System.DefaultWorkingDirectory)'
@@ -41,7 +32,7 @@ steps:
     publisherId: '$(PublisherID)'
     extensionId: '$(ExtensionID)'
     extensionName: '$(ExtensionName)'
-    extensionVersion: '$(QueryVersion.Extension.Version)'
+    extensionVersion: '0.0.$(Build.BuildNumber)'
     updateTasksVersion: true
     updateTasksVersionType: 'patch'
     extensionVisibility: 'private'
