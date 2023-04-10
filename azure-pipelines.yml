@@ -8,6 +8,10 @@ variables:
   - group: 'Publish extension DEV'
 
 steps:
+- task: TfxInstaller@4
+  inputs:
+    version: "0.x"
+
 - task: Npm@1
   inputs:
     command: ci
