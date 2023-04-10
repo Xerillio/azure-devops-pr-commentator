@@ -1,0 +1,52 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: Npm@1
+  inputs:
+    command: ci
+  displayName: 'npm clean install'
+
+- task: Npm@1
+  inputs:
+    command: custom
+    customCommand: package-dev
+  displayName: 'npm run package-dev'
+
+- task: QueryAzureDevOpsExtensionVersion@4
+  name: QueryVersion
+  inputs:
+    connectTo: 'VsTeam'
+    connectedServiceName: 'MarketplaceServiceConnection'
+    publisherId: '$(PublisherID)'
+    extensionId: '$(ExtensionID)'
+    versionAction: 'Patch' # Increase patch version
+
+- task: PackageAzureDevOpsExtension@4
+  inputs:
+    rootFolder: '$(System.DefaultWorkingDirectory)'
+    patternManifest: |
+      vss-extension.json
+      vss-extension.dev.json
+    publisherId: '$(PublisherID)'
+    extensionId: '$(ExtensionID)'
+    extensionName: '$(ExtensionName)'
+    extensionVersion: '$(QueryVersion.Extension.Version)'
+    updateTasksVersion: true
+    updateTasksVersionType: 'patch'
+    extensionVisibility: 'private'
+    extensionPricing: 'free'
+
+- task: CopyFiles@2
+  inputs:
+    Contents: "**/*.vsix"
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: '$(ArtifactName)'
+    publishLocation: Container
