@@ -17,11 +17,11 @@ steps:
     command: ci
   displayName: 'npm clean install'
 
-# - task: Npm@1
-#   inputs:
-#     command: custom
-#     customCommand: 'run package-dev'
-#   displayName: 'npm run package-dev'
+- task: Npm@1
+  inputs:
+    command: custom
+    customCommand: 'run build'
+  displayName: 'npm run build'
 
 - task: PackageAzureDevOpsExtension@4
   inputs:
