@@ -7,7 +7,6 @@ npm run lint
 # Warn about files you typically don't want to check in
 files=(
     "vss-extension.dev.json"
-    "task.dev.json"
 )
 result=$(git diff-index --cached --name-status HEAD "${files[@]}")
 if [[ "${result}" != "" ]]
