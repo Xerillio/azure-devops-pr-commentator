@@ -7,44 +7,69 @@ pool:
 variables:
   - group: 'Publish extension DEV'
 
-steps:
-- task: TfxInstaller@4
-  inputs:
-    version: "0.x"
-
-- task: Npm@1
-  inputs:
-    command: ci
-  displayName: 'npm clean install'
-
-- task: Npm@1
-  inputs:
-    command: custom
-    customCommand: 'run build'
-  displayName: 'npm run build'
-
-- task: PackageAzureDevOpsExtension@4
-  inputs:
-    rootFolder: '$(System.DefaultWorkingDirectory)'
-    patternManifest: |
-      vss-extension.json
-      vss-extension.dev.json
-    publisherId: '$(PublisherID)'
-    extensionId: '$(ExtensionID)'
-    extensionName: '$(ExtensionName)'
-    extensionVersion: '0.0.$(Build.BuildNumber)'
-    updateTasksVersion: true
-    updateTasksVersionType: 'patch'
-    extensionVisibility: 'private'
-    extensionPricing: 'free'
-
-- task: CopyFiles@2
-  inputs:
-    Contents: "**/*.vsix"
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: '$(ArtifactName)'
-    publishLocation: Container
+stages:
+  - stage: Build_and_package
+    jobs:
+      - job:
+        steps:
+        - task: TfxInstaller@4
+          inputs:
+            version: "0.x"
+        - task: Npm@1
+          inputs:
+            command: ci
+          displayName: 'npm clean install'
+        - task: Npm@1
+          inputs:
+            command: custom
+            customCommand: 'run build'
+          displayName: 'npm run build'
+        - task: PackageAzureDevOpsExtension@4
+          inputs:
+            rootFolder: '$(System.DefaultWorkingDirectory)'
+            patternManifest: |
+              vss-extension.json
+              vss-extension.dev.json
+            publisherId: '$(PublisherID)'
+            extensionId: '$(ExtensionID)'
+            extensionName: '$(ExtensionName)'
+            extensionVersion: '0.0.$(Build.BuildNumber)'
+            updateTasksVersion: true
+            updateTasksVersionType: 'patch'
+            extensionVisibility: 'private'
+            extensionPricing: 'free'
+        - task: CopyFiles@2
+          inputs:
+            Contents: "**/*.vsix"
+            TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: '$(ArtifactName)'
+            publishLocation: Container
+  - stage: Publish_extension
+    jobs:
+      - job:
+        steps:
+        - task: TfxInstaller@4
+          inputs:
+            version: "0.x"
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: "current"
+            downloadType: "single"
+            artifactName: "$(ArtifactName)"
+            downloadPath: "$(System.DefaultWorkingDirectory)"
+        - task: PublishAzureDevOpsExtension@4
+          inputs:
+            connectTo: 'VsTeam'
+            connectedServiceName: 'MarketplaceServiceConnection'
+            fileType: 'vsix'
+            vsixFile: '$(PublisherID).$(ExtensionName)/$(PublisherID)..vsix'
+            publisherId: '$(PublisherID)'
+            extensionId: '$(ExtensionID)'
+            extensionName: '$(ExtensionName)'
+            updateTasksVersion: false
+            extensionVisibility: 'private'
+            shareWith: '$(PublisherID)'
+            extensionPricing: 'free'
