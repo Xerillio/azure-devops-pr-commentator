@@ -1,11 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/vss-extension",
     "manifestVersion": 1,
-    "id": "pr-commentator",
-    "public": true,
-    "name": "Pull Request Commentator",
-    "version": "0.0.1",
-    "publisher": "xerillio",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"

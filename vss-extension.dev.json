@@ -1,6 +1,5 @@
 {
     "$schema": "https://json.schemastore.org/vss-extension",
-    "manifestVersion": 1,
     "id": "pr-commentator-dev",
     "public": false,
     "name": "Pull Request Commentator - DEV",
