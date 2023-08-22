@@ -2,5 +2,5 @@
     "all": true,
     "src": "./src",
     "extension": [".ts"],
-    "report-dir": "./.coverage"
+    "report-dir": "./coverage"
 }

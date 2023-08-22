@@ -2,4 +2,5 @@ node_modules
 bin
 .task
 .nyc_output
-.coverage
+coverage
+test-report.sonar.xml

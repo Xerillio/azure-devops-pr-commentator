@@ -65,7 +65,7 @@ Now, there are a few bits and pieces that are good to know once you start coding
   | Script name           | Description |
   | --------------------- | ----------- |
   | `test`                | Runs all Mocha tests. |
-  | `coverage`            | Runs all tests and outputs a test coverage report. You can run `coverage-html` for a more detailed report, which you'll find in the generated `.coverage` folder at the root of the repository. |
+  | `coverage`            | Runs all tests and outputs a test coverage report. You can run `coverage-html` for a more detailed report, which you'll find in the generated `/coverage` folder. |
   | `lint` and `lint-fix` | Runs ESLint and reports linting issues found in your code and optionally fixes some of them automatically. `lint` is automatically run when you try to commit your code. |
   | `build-dev`           | When you have a version of your changes that you think is ready, this command will create an extension package (a VSIX file) which you can [publish and install](https://learn.microsoft.com/en-us/azure/devops/extend/develop/add-build-task?view=azure-devops#5-publish-your-extension) in your own DevOps project to test it. Extension and task version numbers are automatically bumped to ensure your latest package is used when publishing - even if you didn't make any code changes. You can also update [`task.json`](../task.json) if you e.g. want to make changes to the inputs. |
 
