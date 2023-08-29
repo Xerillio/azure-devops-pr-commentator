@@ -1,6 +1,6 @@
 import { getVariable } from "azure-pipelines-task-lib";
 
-export class Variables {
+export class Variables implements IVariables {
     public get collectionUri(): string {
         return Variables.getRequiredVariable("SYSTEM_COLLECTIONURI");
     }
@@ -26,4 +26,11 @@ export class Variables {
         }
         return value;
     }
+}
+
+export interface IVariables {
+    readonly collectionUri: string
+    readonly accessToken: string
+    readonly repositoryId: string
+    readonly pullRequestId: number
 }

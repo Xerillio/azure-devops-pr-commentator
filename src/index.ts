@@ -2,7 +2,7 @@ import { setResult, TaskResult } from "azure-pipelines-task-lib/task";
 import { type IGitApi } from "azure-devops-node-api/GitApi";
 import { createGitClient } from "./azure-helpers";
 import { Inputs, type IInputs } from "./inputs";
-import { Variables } from "./variables";
+import { Variables, type IVariables } from "./variables";
 import { validateAll } from "./validators/validator";
 import { Commentator } from "./commentator";
 
@@ -14,7 +14,7 @@ class TaskRunner {
     constructor(
         private readonly client: IGitApi,
         private readonly inputs: IInputs,
-        vars: Variables
+        vars: IVariables
     ) {
         this.repoId = vars.repositoryId;
         this.prId = vars.pullRequestId;

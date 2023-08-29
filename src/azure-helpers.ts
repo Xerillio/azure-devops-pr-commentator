@@ -1,9 +1,9 @@
 import * as DevOps from "azure-devops-node-api";
 import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type Variables } from "./variables";
+import { type IVariables } from "./variables";
 import { type IInputs } from "./inputs";
 
-export async function createGitClient(inputs: IInputs, vars: Variables): Promise<IGitApi> {
+export async function createGitClient(inputs: IInputs, vars: IVariables): Promise<IGitApi> {
     let credHandler;
     if (inputs.pat !== undefined) {
         credHandler = DevOps.getPersonalAccessTokenHandler(inputs.pat);
