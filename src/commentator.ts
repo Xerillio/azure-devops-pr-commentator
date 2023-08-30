@@ -4,7 +4,7 @@ import { type IInputs } from "./inputs";
 import { isAutoCommentThread } from "./type-guards";
 import { type IResultContext } from "./validators/validator";
 
-export class Commentator {
+export class Commentator implements ICommentator {
     constructor(
         private readonly inputs: IInputs,
         private readonly client: IGitApi
@@ -55,4 +55,8 @@ export class Commentator {
 
         return { filePath: context.files[0] };
     };
+}
+
+export interface ICommentator {
+    createComment: (repositoryId: string, prId: number, context?: IResultContext) => Promise<string>
 }

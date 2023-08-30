@@ -14,6 +14,12 @@ const adoNodeApiStubDefaults = {
 };
 const adoNodeApiStub = Object.assign({}, adoNodeApiStubDefaults);
 
+export function rewire(moduleStubs: Map<string, any>): void {
+    for (const [module, stub] of moduleStubs) {
+        rewiremock(module).with(stub);
+    }
+}
+
 export function rewireAll(): void {
     clear();
 
