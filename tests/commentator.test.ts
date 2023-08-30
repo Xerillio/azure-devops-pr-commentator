@@ -114,6 +114,40 @@ describe("Commentator", () => {
                     "foo",
                     7357);
             });
+
+            it("should have a threadContext for a file, when there's a single file match", async() => {
+                const stubInputs = createStubInputs();
+                const stubGitApi = createStubGitApi();
+                const matchContext = { files: ["some-file.txt"] };
+
+                const sut = new Commentator(stubInputs, stubGitApi);
+                await sut.createComment("foo", 7357, matchContext);
+
+                sinon.assert.calledOnce(stubGitApi.createThread);
+                sinon.assert.calledWith(stubGitApi.createThread,
+                    sinon.match({
+                        threadContext: sinon.match({ filePath: "some-file.txt" })
+                    }),
+                    "foo",
+                    7357);
+            });
+
+            it("should have no threadContext, when there are multiple file matches", async() => {
+                const stubInputs = createStubInputs();
+                const stubGitApi = createStubGitApi();
+                const matchContext = { files: ["some-file.txt", "some-other-file.txt"] };
+
+                const sut = new Commentator(stubInputs, stubGitApi);
+                await sut.createComment("foo", 7357, matchContext);
+
+                sinon.assert.calledOnce(stubGitApi.createThread);
+                sinon.assert.calledWith(stubGitApi.createThread,
+                    sinon.match({
+                        threadContext: undefined
+                    }),
+                    "foo",
+                    7357);
+            });
         });
     });
 });
