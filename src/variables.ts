@@ -6,8 +6,7 @@ export class Variables implements IVariables {
     }
 
     public get accessToken(): string {
-        return Variables.getRequiredVariable("SYSTEM_ACCESSTOKEN",
-            "No valid authentication type found");
+        return Variables.getRequiredVariable("SYSTEM_ACCESSTOKEN");
     }
 
     public get repositoryId(): string {
@@ -18,10 +17,10 @@ export class Variables implements IVariables {
         return parseInt(Variables.getRequiredVariable("SYSTEM_PULLREQUEST_PULLREQUESTID"));
     }
 
-    private static getRequiredVariable(variable: string, errorMsg?: string): string {
+    private static getRequiredVariable(variable: string): string {
         const value = getVariable(variable);
         if (value === undefined) {
-            const msg = errorMsg ?? `Environment variable '${variable}' is required but no value was found`;
+            const msg = `Environment variable '${variable}' is required but no value was found`;
             throw new Error(msg);
         }
         return value;

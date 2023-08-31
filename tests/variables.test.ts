@@ -34,7 +34,9 @@ describe("Variables", () => {
             testVariables.delete(systemCollectionUriVariable);
             const sut = await createSut();
 
-            expect(() => sut.collectionUri).to.throw();
+            expect(() => sut.collectionUri).to.throw(
+                Error,
+                "Environment variable 'SYSTEM_COLLECTIONURI' is required but no value was found");
         });
     });
 
@@ -48,7 +50,9 @@ describe("Variables", () => {
             testVariables.delete(systemAccessTokenVariable);
             const sut = await createSut();
 
-            expect(() => sut.accessToken).to.throw();
+            expect(() => sut.accessToken).to.throw(
+                Error,
+                "Environment variable 'SYSTEM_ACCESSTOKEN' is required but no value was found");
         });
     });
 
@@ -62,7 +66,9 @@ describe("Variables", () => {
             testVariables.delete(buildRepositoryIdVariable);
             const sut = await createSut();
 
-            expect(() => sut.repositoryId).to.throw();
+            expect(() => sut.repositoryId).to.throw(
+                Error,
+                "Environment variable 'BUILD_REPOSITORY_ID' is required but no value was found");
         });
     });
 
@@ -76,7 +82,9 @@ describe("Variables", () => {
             testVariables.delete(pullRequestIdVariable);
             const sut = await createSut();
 
-            expect(() => sut.pullRequestId).to.throw();
+            expect(() => sut.pullRequestId).to.throw(
+                Error,
+                "Environment variable 'SYSTEM_PULLREQUEST_PULLREQUESTID' is required but no value was found");
         });
     });
 });
