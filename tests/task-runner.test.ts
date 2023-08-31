@@ -29,7 +29,7 @@ describe("TaskRunner", () => {
             const result = await sut.run();
 
             expect(result.succeeded).to.be.true;
-            expect(result.message).to.have.length.greaterThan(0);
+            expect(result.message).to.match(/^Conditions successfully met/);
         });
 
         it("should succeed when conditions are not met", async() => {
@@ -43,7 +43,7 @@ describe("TaskRunner", () => {
             const result = await sut.run();
 
             expect(result.succeeded).to.be.true;
-            expect(result.message).to.have.length.greaterThan(0);
+            expect(result.message).to.match(/^One or more conditions were not met/);
         });
 
         it("should include comment hash in result message", async() => {

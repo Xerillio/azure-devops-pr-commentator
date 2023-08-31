@@ -12,7 +12,7 @@ const adoNodeApiStubDefaults = {
         getGitApi: sinon.stub().callsFake(() => undefined)
     }))
 };
-const adoNodeApiStub = Object.assign({}, adoNodeApiStubDefaults);
+const adoNodeApiStub = { ...adoNodeApiStubDefaults };
 
 export function rewire(moduleStubs: Map<string, any>): void {
     for (const [module, stub] of moduleStubs) {
