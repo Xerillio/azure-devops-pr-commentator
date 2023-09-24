@@ -3,37 +3,46 @@ import type * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfa
 import { minimatch } from "minimatch";
 import { type IInputs } from "../inputs";
 import { hasId } from "../type-guards";
-import { type IValidationResult, type IValidator } from "./validator";
+import type { IResultContext, IValidationResult, IValidator } from "./validator";
+import { type IVariables } from "../variables";
 
 export class FileGlobValidator implements IValidator {
+    private readonly repositoryId: string;
+    private readonly prId: number;
+
     constructor(
         private readonly client: IGitApi,
-        private readonly inputs: IInputs
-    ) { }
+        private readonly inputs: IInputs,
+        private readonly variables: IVariables
+    ) {
+        this.repositoryId = variables.repositoryId;
+        this.prId = variables.pullRequestId;
+    }
 
-    public readonly check = async(repositoryId: string, prId: number): Promise<IValidationResult> => {
+    public readonly check = async(resultContext: IResultContext): Promise<IValidationResult> => {
         if (this.inputs.fileGlob === undefined) {
-            return { conditionMet: true };
+            return { conditionMet: true, context: resultContext };
         }
 
-        const matchingChanges = await this.getMatchingChanges(repositoryId, prId, this.inputs.fileGlob);
+        const matchingChanges = await this.getMatchingChanges(this.inputs.fileGlob);
         if (matchingChanges.length > 0) {
             console.log("Found the following matches for the glob expression:\n    " +
                 matchingChanges.map(c => c.item?.path).join("\n    "));
             return {
                 conditionMet: true,
                 context: {
+                    ...resultContext,
                     files: matchingChanges.map(change => change.item?.path ?? "")
                 }
             };
         }
 
         console.log("No match found for the glob expression");
-        return { conditionMet: false };
+        return { conditionMet: false, context: resultContext };
     };
 
-    private readonly getMatchingChanges = async(repositoryId: string, prId: number, fileGlob: string): Promise<GitInterfaces.GitPullRequestChange[]> => {
-        const lastIterationId = await this.getLastIterationId(repositoryId, prId);
+    private readonly getMatchingChanges = async(fileGlob: string): Promise<GitInterfaces.GitPullRequestChange[]> => {
+        const lastIterationId = await this.getLastIterationId();
         let changes: GitInterfaces.GitPullRequestIterationChanges | undefined;
         const matchingChanges: GitInterfaces.GitPullRequestChange[] = [];
         const matchesGlob = (changeEntry: GitInterfaces.GitPullRequestChange): boolean =>
@@ -41,8 +50,8 @@ export class FileGlobValidator implements IValidator {
 
         do {
             changes = await this.client.getPullRequestIterationChanges(
-                repositoryId,
-                prId,
+                this.repositoryId,
+                this.prId,
                 lastIterationId,
                 undefined,
                 changes?.nextTop,
@@ -55,8 +64,8 @@ export class FileGlobValidator implements IValidator {
         return matchingChanges;
     };
 
-    private readonly getLastIterationId = async(repositoryId: string, prId: number): Promise<number> => {
-        const iterations = await this.client.getPullRequestIterations(repositoryId, prId);
+    private readonly getLastIterationId = async(): Promise<number> => {
+        const iterations = await this.client.getPullRequestIterations(this.repositoryId, this.prId);
         return iterations
             .filter(hasId)
             .sort((i1, i2) => i1.id - i2.id)

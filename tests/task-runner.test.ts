@@ -1,30 +1,21 @@
 import { expect } from "chai";
-import sinon, { stubInterface } from "ts-sinon";
-import { createStubCommentator, createStubInputs, createStubValidator, createStubVariables } from "./stub-helper";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { clear, instantiate, rewire } from "./rewire";
+import sinon, { type StubbedInstance, stubInterface } from "ts-sinon";
+import { createStubCommentator, createStubVariables } from "./stub-helper";
+import { instantiate } from "./rewire";
 import { type TaskRunner } from "../src/task-runner";
 import { type ICommentator } from "../src/commentator";
+import { type IValidatorFactory } from "../src/validators/validator-factory";
 
 describe("TaskRunner", () => {
-    beforeEach(() => {
-        clear();
-
-        rewire(new Map<string, any>([
-            ["./validators/validator", createStubValidator()]
-        ]));
-    });
-    after(clear);
-
-    const createSut = async(commentator: ICommentator): Promise<TaskRunner> =>
+    const createSut = async(commentator: ICommentator, validatorFactory: IValidatorFactory): Promise<TaskRunner> =>
         await instantiate(async(): Promise<TaskRunner> => {
             const constructor = (await import("../src/task-runner")).TaskRunner;
-            return new constructor(stubInterface<IGitApi>(), commentator, createStubInputs(), createStubVariables());
+            return new constructor(commentator, validatorFactory, createStubVariables());
         });
 
     describe("#run()", () => {
         it("should succeed when conditions are met", async() => {
-            const sut = await createSut(createStubCommentator());
+            const sut = await createSut(createStubCommentator(), createStubValidatorFactory());
 
             const result = await sut.run();
 
@@ -33,12 +24,7 @@ describe("TaskRunner", () => {
         });
 
         it("should succeed when conditions are not met", async() => {
-            const validatorStub = createStubValidator(sinon.stub().returns({ conditionMet: false }));
-            rewire(new Map([
-                ["./validators/validator", validatorStub]
-            ]));
-
-            const sut = await createSut(createStubCommentator());
+            const sut = await createSut(createStubCommentator(), createStubValidatorFactory(false));
 
             const result = await sut.run();
 
@@ -51,7 +37,7 @@ describe("TaskRunner", () => {
                 createComment: sinon.stub().returns(Promise.resolve("some-comment-hash"))
             });
 
-            const sut = await createSut(commentatorStub);
+            const sut = await createSut(commentatorStub, createStubValidatorFactory());
 
             const result = await sut.run();
 
@@ -60,3 +46,14 @@ describe("TaskRunner", () => {
         });
     });
 });
+
+function createStubValidatorFactory(isSuccess: boolean = true): StubbedInstance<IValidatorFactory> {
+    const stubFactory = stubInterface<IValidatorFactory>();
+
+    stubFactory.createValidators
+        .returns([{
+            check: sinon.stub().resolves({ conditionMet: isSuccess, context: {} })
+        }]);
+
+    return stubFactory;
+}

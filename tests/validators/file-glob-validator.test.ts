@@ -1,33 +1,34 @@
-import { expect } from "chai";
 import { type IGitApi } from "azure-devops-node-api/GitApi";
-import sinon, { stubInterface, type StubbedInstance } from "ts-sinon";
-import { type FileGlobValidator } from "../../src/validators/file-glob-validator";
 import { type GitPullRequestIterationChanges } from "azure-devops-node-api/interfaces/GitInterfaces";
-import { createStubInputs } from "../stub-helper";
+import { expect } from "chai";
+import sinon, { stubInterface, type StubbedInstance } from "ts-sinon";
 import { type IInputs } from "../../src/inputs";
-import { instantiate, clear, rewireAll, resetStubs, setMinimatchStub } from "../rewire";
+import { type FileGlobValidator } from "../../src/validators/file-glob-validator";
+import { type IVariables } from "../../src/variables";
+import { clear, instantiate, resetStubs, rewireAll, setMinimatchStub } from "../rewire";
+import { createStubInputs, createStubVariables } from "../stub-helper";
 
 describe("FileGlobValidator", () => {
     before(rewireAll);
     after(clear);
     beforeEach(resetStubs);
 
-    const createSut = async(apiClient: IGitApi, inputs: IInputs): Promise<FileGlobValidator> =>
+    const createSut = async(apiClient: IGitApi, inputs: IInputs, variables: IVariables): Promise<FileGlobValidator> =>
         await instantiate(async(): Promise<FileGlobValidator> => {
             const constructor = (await import("../../src/validators/file-glob-validator")).FileGlobValidator;
-            return new constructor(apiClient, inputs);
+            return new constructor(apiClient, inputs, variables);
         });
 
     describe("#check()", () => {
         it("should succeed when inputs contain no fileGlob", async() => {
             const stubInputs = createStubInputs({ fileGlob: undefined });
             const stubApiClient = createStubGitApi();
-            const sut = await createSut(stubApiClient, stubInputs);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
-            const result = await sut.check("foo", 7357);
+            const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
-            expect(result.context).is.undefined;
+            expect(result.context).to.deep.equal({});
         });
 
         it("should succeed when fileGlob matches one file", async() => {
@@ -37,9 +38,9 @@ describe("FileGlobValidator", () => {
             const minimatchStub = sinon.stub<[string, string], boolean>()
                 .callsFake((path: string, _: string) => path === fileGlob);
             setMinimatchStub(minimatchStub);
-            const sut = await createSut(stubApiClient, stubInputs);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
-            const result = await sut.check("foo", 7357);
+            const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
             expect(result.context?.files).to.have.members([fileGlob]);
@@ -54,9 +55,9 @@ describe("FileGlobValidator", () => {
             const minimatchStub = sinon.stub<[string, string], boolean>()
                 .callsFake((path: string, _: string) => path === fileGlob);
             setMinimatchStub(minimatchStub);
-            const sut = await createSut(stubApiClient, stubInputs);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
-            const result = await sut.check("foo", 7357);
+            const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
             expect(result.context?.files).to.have.members([fileGlob]);
@@ -72,9 +73,9 @@ describe("FileGlobValidator", () => {
             const minimatchStub = sinon.stub<[string, string], boolean>()
                 .callsFake((_: string, __: string) => true);
             setMinimatchStub(minimatchStub);
-            const sut = await createSut(stubApiClient, stubInputs);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
-            const result = await sut.check("foo", 7357);
+            const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
             expect(result.context?.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
@@ -87,12 +88,12 @@ describe("FileGlobValidator", () => {
             const stubApiClient = createStubGitApi();
             stubApiClient.getPullRequestIterationChanges
                 .onSecondCall().resolves(pageTwoIterationChanges());
-            const sut = await createSut(stubApiClient, stubInputs);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
-            const result = await sut.check("foo", 7357);
+            const result = await sut.check({});
 
             expect(result.conditionMet).is.false;
-            expect(result.context).is.undefined;
+            expect(result.context).to.deep.equal({});
             sinon.assert.calledTwice(stubApiClient.getPullRequestIterationChanges);
         });
     });

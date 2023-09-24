@@ -1,22 +1,21 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type IInputs } from "../inputs";
-import { FileGlobValidator } from "./file-glob-validator";
+import { type IValidatorFactory } from "./validator-factory";
 
 export interface IValidator {
     /**
      * Validates a specific condition usually identified by one of the task inputs.
-     * @param repositoryId The ID of the repository which the {@link prId} belongs to.
-     * @param prId The ID of the pull request to validate.
-     * @returns An {@link IValidationResult} indicating if the condition in this validator was met.
+     * @param resultContext The context in which all previously run validators found a match.
+     * The {@link IValidator} may use this to narrow the scope to match, when relevant.
+     * @returns An {@link IValidationResult} indicating if the condition in this validator was
+     * met as well as the updated context for the match.
      */
-    check: (repositoryId: string, prId: number) => Promise<IValidationResult>
+    check: (resultContext: IResultContext) => Promise<IValidationResult>
 }
 
 export interface IValidationResult {
     /** True, if the validated condition was met, otherwise false. */
     conditionMet: boolean
     /** Additional context for the condition that was validated, such as files that matched the condition. */
-    context?: IResultContext
+    context: IResultContext
 }
 
 export interface IResultContext {
@@ -34,6 +33,18 @@ export interface IResultContext {
  * @param prId The ID of the pull request to validate.
  * @returns An {@link IValidationResult} indicating if all conditions for creating a comment were met.
  */
-export async function validateAll(client: IGitApi, inputs: IInputs, repositoryId: string, prId: number): Promise<IValidationResult> {
-    return await new FileGlobValidator(client, inputs).check(repositoryId, prId);
+export async function validateAll(factory: IValidatorFactory): Promise<IValidationResult> {
+    const validators = factory.createValidators();
+
+    let result: IValidationResult = {
+        context: {},
+        conditionMet: false
+    };
+
+    for (const validator of validators) {
+        result = await validator.check(result.context);
+        if (!result.conditionMet) break;
+    }
+
+    return result;
 }
