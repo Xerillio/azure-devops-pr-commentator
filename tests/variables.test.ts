@@ -6,6 +6,7 @@ const systemCollectionUriVariable = "SYSTEM_COLLECTIONURI";
 const systemAccessTokenVariable = "SYSTEM_ACCESSTOKEN";
 const buildRepositoryIdVariable = "BUILD_REPOSITORY_ID";
 const pullRequestIdVariable = "SYSTEM_PULLREQUEST_PULLREQUESTID";
+const projectNameVariable = "SYSTEM_TEAMPROJECT";
 
 describe("Variables", () => {
     before(rewireAll);
@@ -22,6 +23,7 @@ describe("Variables", () => {
         testVariables.set(systemAccessTokenVariable, "testAccessToken");
         testVariables.set(buildRepositoryIdVariable, "test-repository-uuid");
         testVariables.set(pullRequestIdVariable, "7357");
+        testVariables.set(projectNameVariable, "test-project-name");
     });
 
     describe("#collectionUri", () => {
@@ -85,6 +87,22 @@ describe("Variables", () => {
             expect(() => sut.pullRequestId).to.throw(
                 Error,
                 "Environment variable 'SYSTEM_PULLREQUEST_PULLREQUESTID' is required but no value was found");
+        });
+    });
+
+    describe("#projectName", () => {
+        it("should return test-project-name", async() => {
+            const sut = await createSut();
+            expect(sut.projectName).to.equal("test-project-name");
+        });
+
+        it("should throw when it has no value", async() => {
+            testVariables.delete(projectNameVariable);
+            const sut = await createSut();
+
+            expect(() => sut.projectName).to.throw(
+                Error,
+                "Environment variable 'SYSTEM_TEAMPROJECT' is required but no value was found");
         });
     });
 });

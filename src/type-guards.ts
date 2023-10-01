@@ -28,3 +28,13 @@ export interface IAutoCommentThreadProperties {
 export interface IAutoCommentThreadPropertiesHash {
     $value: string
 }
+
+export function isWellFormedCommit<T extends { commitId?: string, comment?: string }>(obj: T): obj is T & IWellFormedCommit {
+    return obj.commitId !== undefined &&
+        obj.comment !== undefined;
+}
+
+export interface IWellFormedCommit {
+    commitId: string
+    comment: string
+}

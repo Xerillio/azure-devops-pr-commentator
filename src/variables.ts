@@ -17,6 +17,10 @@ export class Variables implements IVariables {
         return parseInt(Variables.getRequiredVariable("SYSTEM_PULLREQUEST_PULLREQUESTID"));
     }
 
+    public get projectName(): string {
+        return Variables.getRequiredVariable("SYSTEM_TEAMPROJECT");
+    }
+
     private static getRequiredVariable(variable: string): string {
         const value = getVariable(variable);
         if (value === undefined) {
@@ -32,4 +36,5 @@ export interface IVariables {
     readonly accessToken: string
     readonly repositoryId: string
     readonly pullRequestId: number
+    readonly projectName: string
 }

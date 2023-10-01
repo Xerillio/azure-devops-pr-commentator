@@ -22,7 +22,14 @@ export interface IResultContext {
     /** A list of file paths that matched the condition of the {@link IValidationResult}. */
     files?: string[]
     /** A list of commits that matched the condition of the {@link IValidationResult}. */
-    commits?: string[]
+    commits?: ICommitContext[]
+}
+
+export interface ICommitContext {
+    /** The hash of the commit. Also known as the ID of the commit. */
+    hash: string
+    /** The message/comment of the commit */
+    message: string
 }
 
 /**
