@@ -55,6 +55,7 @@ export class Commentator implements ICommentator {
             return undefined;
         }
 
+        console.log(`Adding comment thread to a file: ${context.files[0]}`);
         return { filePath: context.files[0] };
     };
 
