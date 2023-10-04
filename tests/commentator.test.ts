@@ -179,7 +179,7 @@ describe("Commentator", () => {
                 sinon.assert.calledWith(stubGitApi.createThread,
                     sinon.match({
                         comments: [sinon.match({
-                            content: sinon.match(/^expected comment content.*?\/some\/file\/path\/10.txt\n\n<\/details>$/s)
+                            content: sinon.match(/^expected comment content.*?\/some\/file\/path\/10.txt\n\* And more...\n\n<\/details>$/s)
                         })]
                     }),
                     "foo",
@@ -281,7 +281,7 @@ describe("Commentator", () => {
                 sinon.assert.calledWith(stubGitApi.createThread,
                     sinon.match({
                         comments: [sinon.match({
-                            content: sinon.match(/^expected comment content.*?`j012345 Commit message 10`\n\n<\/details>$/s)
+                            content: sinon.match(/^expected comment content.*?`j012345 Commit message 10`\n\* And more...\n\n<\/details>$/s)
                         })]
                     }),
                     "foo",

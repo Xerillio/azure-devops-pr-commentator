@@ -96,9 +96,14 @@ export class Commentator implements ICommentator {
     };
 
     private readonly createUnorderedList = <T>(items: T[], mapper: (item: T) => string): string => {
-        return items.slice(0, 10)
-            .map(item => `* ${mapper(item)}`)
-            .join("\n");
+        const itemsToDisplay = items.slice(0, 10)
+            .map(item => `* ${mapper(item)}`);
+
+        if (items.length > itemsToDisplay.length) {
+            itemsToDisplay.push("* And more...");
+        }
+
+        return itemsToDisplay.join("\n");
     };
 
     private readonly createCollapseContent = (summary: string, content: string): string => {
