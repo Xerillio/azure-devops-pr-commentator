@@ -17,6 +17,8 @@ This will generate a comment like the following:
 
 ![Automated comment](images/automated-comment.jpg)
 
+A more detailed description of the task and inputs can be found in the [Marketplace Overview](marketplace-overview.md).
+
 ## Contributing
 
 This project is open source and [contributions are welcome](.github/contributing.md).
