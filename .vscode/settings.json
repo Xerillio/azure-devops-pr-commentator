@@ -1,6 +1,14 @@
 {
     "[typescript]": {
+        "editor.formatOnSave": true,
         "editor.tabSize": 4,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "xerillio",
+        "projectKey": "Xerillio_azure-devops-pr-commentator"
     }
 }
