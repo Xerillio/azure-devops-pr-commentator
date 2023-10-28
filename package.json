@@ -38,7 +38,7 @@
         "cpy-cli": "^4.2.0",
         "eslint": "^8.34.0",
         "eslint-config-standard-with-typescript": "^34.0.0",
-        "eslint-formatter-friendly": "github:Xerillio/eslint-friendly-formatter#5b12360ea34f934941a169f48dec358befc4dcb6",
+        "eslint-formatter-friendly": "github:xerillio/eslint-formatter-friendly#af80c289aa56feb587b9cd3bfc370ce42aba3eca",
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-n": "^15.6.1",
         "eslint-plugin-promise": "^6.1.1",
