@@ -10,7 +10,7 @@ If you want to fix a bug or implement a feature request that already have an ope
 
 To get started working on this extension, there are a few prerequisites:
 
-* You must have Node.js version 16 or higher installed
+* You must have Node.js version 20 or higher installed (both Node 20 and 24 are supported)
 * You have forked and cloned the repository as [outlined here](https://docs.github.com/en/get-started/quickstart/contributing-to-projects)
 * You have an Azure DevOps project you can use to test your changes. You can create a personal project for free at Microsoft's website.
 
@@ -25,6 +25,18 @@ That's it! Although, you can find a few extra tips below to ease your developmen
 Whether you are fixing a bug or implementing a new feature, tests are required to keep the quality high.
 
 This project uses [Mocha](https://mochajs.org/) to run tests and all tests are run as part of the pre-commit hook using [husky](https://typicode.github.io/husky/#/).
+
+To verify tests against both supported Node versions (Node 20 and Node 24) locally, you can switch Node versions using `nvm`:
+
+```bash
+# Test on Node 20
+nvm use 20
+npm test
+
+# Test on Node 24
+nvm use 24
+npm test
+```
 
 You can get inspiration from some of the existing tests in the `/tests` folder. For new test files please use the naming convention `<test-target>.test.ts`, where `<test-target>` is the name of the file you're testing.
 

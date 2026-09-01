@@ -12,6 +12,7 @@
         "Minor": 0,
         "Patch": 4
     },
+    "minimumAgentVersion": "4.248.0",
     "instanceNameFormat": "PR Commentator",
     "inputs": [
         {
@@ -72,7 +73,10 @@
         }
     ],
     "execution": {
-        "Node16": {
+        "Node20_1": {
+            "target": "index.js"
+        },
+        "Node24": {
             "target": "index.js"
         }
     }
