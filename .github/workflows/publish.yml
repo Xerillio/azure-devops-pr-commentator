@@ -99,5 +99,5 @@ jobs:
             --share-with "$PUBLISHER_ID" \
             --token "$MARKETPLACE_TOKEN" \
             --service-url https://marketplace.visualstudio.com \
-            --no-prompt
+            --no-prompt \
             --no-wait-validation
