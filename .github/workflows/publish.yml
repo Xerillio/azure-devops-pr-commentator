@@ -100,3 +100,4 @@ jobs:
             --token "$MARKETPLACE_TOKEN" \
             --service-url https://marketplace.visualstudio.com \
             --no-prompt
+            --no-wait-validation
