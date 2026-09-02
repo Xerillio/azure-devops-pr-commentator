@@ -82,12 +82,17 @@ jobs:
           echo "Created package: ${VSIX_PATH}"
 
       - name: Publish extension to Visual Studio Marketplace
-        if: ${{ secrets.MARKETPLACE_TOKEN != '' }}
         shell: bash
         env:
           MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
         run: |
           set +x
+
+          if [ -z "$MARKETPLACE_TOKEN" ]; then
+            echo "MARKETPLACE_TOKEN is not configured; skipping Marketplace publish."
+            exit 0
+          fi
+
           npx tfx-cli extension publish \
             --vsix "$VSIX_PATH" \
             --share-with "$PUBLISHER_ID" \
