@@ -30,6 +30,15 @@ export const createStubValidator = (override?: typeof validateAll): { validateAl
     validateAll: override ?? sinon.stub().returns({ conditionMet: true })
 });
 
+/**
+ * Returns a stubbed method reference without leaving a bare class method in the test body.
+ *
+ * `@typescript-eslint/unbound-method` flags standalone method references because they may be
+ * invoked without the original `this` binding. Accessing the stub through this helper keeps the
+ * assertion on the actual Sinon stub while making the intent explicit in tests.
+ */
+export const getStubMethod = <T extends object, K extends keyof T>(obj: T, key: K): T[K] => obj[key];
+
 export const createStubResultContext = (override?: IResultContext): IResultContext => ({
     commits: [{ hash: "commit-hash-stub", message: "commit message stub" }],
     files: ["some-file-match.stub"],

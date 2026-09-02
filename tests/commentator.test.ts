@@ -6,7 +6,7 @@ import { Commentator } from "../src/commentator";
 import { Resources } from "../src/resources";
 import { type IAutoCommentThread } from "../src/type-guards";
 import { type IResultContext } from "../src/validators/validator";
-import { createStubInputs } from "./stub-helper";
+import { createStubInputs, getStubMethod } from "./stub-helper";
 
 describe("Commentator", () => {
     describe("#createComment()", () => {
@@ -378,9 +378,6 @@ function formatMultiline(text: string): string {
     return result;
 }
 
-function getStubMethod<T extends object, K extends keyof T>(obj: T, key: K): T[K] & sinon.SinonSpy {
-    return obj[key] as T[K] & sinon.SinonSpy;
-}
 function createStubGitApi(): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
     stubGitApi.getThreads.returns(Promise.resolve([]));

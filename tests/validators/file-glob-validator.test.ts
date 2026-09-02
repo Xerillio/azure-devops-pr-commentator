@@ -6,7 +6,7 @@ import { type IInputs } from "../../src/inputs";
 import { type FileGlobValidator } from "../../src/validators/file-glob-validator";
 import { type IVariables } from "../../src/variables";
 import { clear, instantiate, resetStubs, rewireAll, setMinimatchStub } from "../rewire";
-import { createStubInputs, createStubVariables } from "../stub-helper";
+import { createStubInputs, createStubVariables, getStubMethod } from "../stub-helper";
 
 describe("FileGlobValidator", () => {
     before(rewireAll);
@@ -101,10 +101,6 @@ describe("FileGlobValidator", () => {
         });
     });
 });
-
-function getStubMethod<T extends object, K extends keyof T>(obj: T, key: K): T[K] & sinon.SinonSpy {
-    return obj[key] as T[K] & sinon.SinonSpy;
-}
 
 function createStubGitApi(): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
