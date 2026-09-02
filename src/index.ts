@@ -19,8 +19,8 @@ import { GitApiExtension } from "./git-api-extension";
         const runner = new TaskRunner(commentator, valFactory, vars);
         const result = await runner.run();
         setResult(result.succeeded ? TaskResult.Succeeded : TaskResult.Failed, result.message);
-    } catch (err: any) {
-        console.error(err, err.stack);
-        setResult(TaskResult.Failed, err.message);
+    } catch (err: unknown) {
+        console.error(err, err instanceof Error ? err.stack : undefined);
+        setResult(TaskResult.Failed, err instanceof Error ? err.message : String(err));
     }
 })();

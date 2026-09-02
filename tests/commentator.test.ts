@@ -22,9 +22,10 @@ describe("Commentator", () => {
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.createComment("foo", 7357, {});
+            const createThread = getStubMethod(stubGitApi, "createThread");
 
-            sinon.assert.calledOnce(stubGitApi.createThread);
-            sinon.assert.calledWith(stubGitApi.createThread,
+            sinon.assert.calledOnce(createThread);
+            sinon.assert.calledWith(createThread,
                 sinon.match({
                     properties: sinon.match({ hash: result }),
                     status: CommentThreadStatus.Active,
@@ -50,9 +51,10 @@ describe("Commentator", () => {
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.createComment("foo", 7357, {});
+            const createThread = getStubMethod(stubGitApi, "createThread");
 
-            sinon.assert.calledOnce(stubGitApi.createThread);
-            sinon.assert.calledWith(stubGitApi.createThread,
+            sinon.assert.calledOnce(createThread);
+            sinon.assert.calledWith(createThread,
                 sinon.match({
                     properties: sinon.match({ hash: result }),
                     status: CommentThreadStatus.Active,
@@ -78,8 +80,9 @@ describe("Commentator", () => {
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             await sut.createComment("foo", 7357, {});
+            const createThread = getStubMethod(stubGitApi, "createThread");
 
-            sinon.assert.notCalled(stubGitApi.createThread);
+            sinon.assert.notCalled(createThread);
         });
 
         describe("creates a comment with content, that", () => {
@@ -90,9 +93,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, {});
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({ content: expectedContent })]
                     }),
@@ -108,9 +112,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, matchContext);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({ content: expectedContent })]
                     }),
@@ -142,9 +147,10 @@ describe("Commentator", () => {
                     * /some/other/file/path/2.txt
 
                     </details>`);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({ content: expectedComment })]
                     }),
@@ -174,9 +180,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, matchContext);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({
                             content: sinon.match(/^expected comment content.*?\/some\/file\/path\/10.txt\n\* And more...\n\n<\/details>$/s)
@@ -208,9 +215,10 @@ describe("Commentator", () => {
                     * \`0123456 Commit message 1\`
 
                     </details>`);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({ content: expectedComment })]
                     }),
@@ -244,9 +252,10 @@ describe("Commentator", () => {
                     * \`xyz9876 A very long commit message exceeding 72 characters and is expected to be…\`
 
                     </details>`);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({ content: expectedComment })]
                     }),
@@ -276,9 +285,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, matchContext);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         comments: [sinon.match({
                             content: sinon.match(/^expected comment content.*?`j012345 Commit message 10`\n\* And more...\n\n<\/details>$/s)
@@ -297,9 +307,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, {});
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         properties: sinon.match({ hash: expectedHash })
                     }),
@@ -314,9 +325,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, matchContext);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         threadContext: sinon.match({ filePath: "some-file.txt" })
                     }),
@@ -331,9 +343,10 @@ describe("Commentator", () => {
 
                 const sut = new Commentator(stubInputs, stubGitApi);
                 await sut.createComment("foo", 7357, matchContext);
+                const createThread = getStubMethod(stubGitApi, "createThread");
 
-                sinon.assert.calledOnce(stubGitApi.createThread);
-                sinon.assert.calledWith(stubGitApi.createThread,
+                sinon.assert.calledOnce(createThread);
+                sinon.assert.calledWith(createThread,
                     sinon.match({
                         threadContext: undefined
                     }),
@@ -365,6 +378,9 @@ function formatMultiline(text: string): string {
     return result;
 }
 
+function getStubMethod<T extends object, K extends keyof T>(obj: T, key: K): T[K] & sinon.SinonSpy {
+    return obj[key] as T[K] & sinon.SinonSpy;
+}
 function createStubGitApi(): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
     stubGitApi.getThreads.returns(Promise.resolve([]));

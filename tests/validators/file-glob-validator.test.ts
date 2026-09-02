@@ -61,7 +61,8 @@ describe("FileGlobValidator", () => {
 
             expect(result.conditionMet).is.true;
             expect(result.context?.files).to.have.members([fileGlob]);
-            sinon.assert.calledTwice(stubApiClient.getPullRequestIterationChanges);
+            const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
+            sinon.assert.calledTwice(getPullRequestIterationChanges);
         });
 
         it("should succeed when fileGlob matches multiple files on multiple pages", async() => {
@@ -79,7 +80,8 @@ describe("FileGlobValidator", () => {
 
             expect(result.conditionMet).is.true;
             expect(result.context?.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
-            sinon.assert.calledTwice(stubApiClient.getPullRequestIterationChanges);
+            const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
+            sinon.assert.calledTwice(getPullRequestIterationChanges);
         });
 
         it("should fail when fileGlob matches no files", async() => {
@@ -94,10 +96,15 @@ describe("FileGlobValidator", () => {
 
             expect(result.conditionMet).is.false;
             expect(result.context).to.deep.equal({});
-            sinon.assert.calledTwice(stubApiClient.getPullRequestIterationChanges);
+            const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
+            sinon.assert.calledTwice(getPullRequestIterationChanges);
         });
     });
 });
+
+function getStubMethod<T extends object, K extends keyof T>(obj: T, key: K): T[K] & sinon.SinonSpy {
+    return obj[key] as T[K] & sinon.SinonSpy;
+}
 
 function createStubGitApi(): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
