@@ -11,12 +11,12 @@ jobs:
   eslint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
       - run: npm ci
-      - uses: sibiraj-s/action-eslint@v3
+      - uses: sibiraj-s/action-eslint@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           eslint-args: '--ignore-path=.gitignore --quiet'
