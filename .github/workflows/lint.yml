@@ -19,6 +19,6 @@ jobs:
       - uses: sibiraj-s/action-eslint@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          eslint-args: '--ignore-path=.gitignore --quiet'
+          eslint-args: '--quiet'
           extensions: 'ts'
           annotations: true

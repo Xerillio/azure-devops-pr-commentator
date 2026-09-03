@@ -3,7 +3,7 @@ import love from "eslint-config-love";
 
 export default [
     {
-        ignores: ["node_modules/**", "bin/**", ".task/**"]
+        ignores: ["node_modules/**", "bin/**", ".task/**", "coverage/**"]
     },
     {
         ...love,
