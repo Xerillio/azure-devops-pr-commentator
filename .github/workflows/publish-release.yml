@@ -1,20 +1,19 @@
-name: Publish extension
+name: Publish release extension
 
 on:
-  push:
-    branches:
-      - main
-      - release
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-  publish:
+  publish-release:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/release' && 'marketplace-publish' || 'marketplace-publish-dev' }}
+    environment: marketplace-publish
     permissions:
       contents: read
     env:
       PUBLISHER_ID: xerillio
+      MANIFEST: vss-extension.release.json
+      VERSION: ${{ github.event.release.tag_name }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -31,23 +30,23 @@ jobs:
       - name: Build extension
         run: npm run build
 
-      - name: Resolve publish target and environment variables
+      - name: Validate release version
         shell: bash
         run: |
-          if [ "${GITHUB_REF_NAME}" = "release" ]; then
-            MANIFEST="vss-extension.release.json"
-            PUBLISH_TARGET="release"
-            IS_EXT_PUBLIC="true"
-          else
-            MANIFEST="vss-extension.dev.json"
-            PUBLISH_TARGET="dev"
-            IS_EXT_PUBLIC="false"
+          if [[ ! "${VERSION}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag '${VERSION}' is not compatible with the Azure DevOps task version format (<major>.<minor>.<patch>)."
+            echo "Example: \"v1.20260904.10\" (the leading \"v\" is optional")."
+            exit 1
           fi
 
-          BUILD_DATE="$(date -u +%Y%m%d)"
-          VERSION="1.${BUILD_DATE}.${GITHUB_RUN_NUMBER}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          
+          echo "Resolved extension version: ${VERSION}"
 
-          # Generate consistent namespace based task UUID (v5)
+      - name: Define task metadata
+        shell: bash
+        run: |
           TASK_NAME="$(node scripts/get-task-name.js ".task/task.json")"
           EXTENSION_ID="$(node scripts/get-extension-id.js "$MANIFEST")"
           NAMESPACE="$(uuidgen --sha1 --namespace "@url" --name "https://marketplace.visualstudio.com/vsts")"
@@ -55,14 +54,7 @@ jobs:
             --namespace "$NAMESPACE" \
             --name "${PUBLISHER_ID}.${EXTENSION_ID}.${TASK_NAME}")"
 
-          # Write variables to GITHUB_ENV file for subsequent steps
-          echo "MANIFEST=${MANIFEST}" >> "$GITHUB_ENV"
-          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
-          echo "PUBLISH_TARGET=${PUBLISH_TARGET}" >> "$GITHUB_ENV"
-          echo "IS_EXT_PUBLIC=${IS_EXT_PUBLIC}" >> "$GITHUB_ENV"
           echo "TASK_ID=${TASK_ID}" >> "$GITHUB_ENV"
-
-          echo "Resolved extension target: ${PUBLISH_TARGET} (${VERSION})"
 
       - name: Sync task metadata with extension version
         shell: bash
@@ -72,9 +64,9 @@ jobs:
         shell: bash
         run: |
           npx tfx-cli extension create \
-            --manifests vss-extension.json "${MANIFEST}" \
+            --manifests vss-extension.json "$MANIFEST" \
             --publisher "$PUBLISHER_ID" \
-            --override "{\"version\":\"${VERSION}\",\"public\":${IS_EXT_PUBLIC}}" \
+            --override "{\"version\":\"${VERSION}\"}" \
             --output-path .
 
           VSIX_PATH=$(ls -1 *.vsix | head -n 1)

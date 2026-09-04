@@ -1,0 +1,90 @@
+name: Publish DEV extension
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish-dev:
+    runs-on: ubuntu-latest
+    environment: marketplace-publish-dev
+    permissions:
+      contents: read
+    env:
+      PUBLISHER_ID: xerillio
+      MANIFEST: vss-extension.dev.json
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Set version and task metadata
+        shell: bash
+        run: |
+          BUILD_DATE="$(date -u +%Y%m%d)"
+          VERSION="1.${BUILD_DATE}.${GITHUB_RUN_NUMBER}"
+
+          # Generate consistent namespace based task UUID (v5)
+          TASK_NAME="$(node scripts/get-task-name.js ".task/task.json")"
+          EXTENSION_ID="$(node scripts/get-extension-id.js "$MANIFEST")"
+          NAMESPACE="$(uuidgen --sha1 --namespace "@url" --name "https://marketplace.visualstudio.com/vsts")"
+          TASK_ID="$(uuidgen --sha1 \
+            --namespace "$NAMESPACE" \
+            --name "${PUBLISHER_ID}.${EXTENSION_ID}.${TASK_NAME}")"
+
+          # Write variables to GITHUB_ENV file for subsequent steps
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "TASK_ID=${TASK_ID}" >> "$GITHUB_ENV"
+
+          echo "Resolved extension version: ${VERSION}"
+
+      - name: Sync task metadata with extension version
+        shell: bash
+        run: node scripts/update-task-manifest.js ".task/task.json" "$VERSION" "$TASK_ID"
+
+      - name: Package extension
+        shell: bash
+        run: |
+          npx tfx-cli extension create \
+            --manifests vss-extension.json "${MANIFEST}" \
+            --publisher "$PUBLISHER_ID" \
+            --override "{\"version\":\"${VERSION}\"}" \
+            --output-path .
+
+          VSIX_PATH=$(ls -1 *.vsix | head -n 1)
+          echo "VSIX_PATH=${VSIX_PATH}" >> "$GITHUB_ENV"
+
+          echo "Created package: ${VSIX_PATH}"
+
+      - name: Publish extension to Visual Studio Marketplace
+        shell: bash
+        env:
+          MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
+        run: |
+          set +x
+
+          if [ -z "$MARKETPLACE_TOKEN" ]; then
+            echo "MARKETPLACE_TOKEN is not configured; skipping Marketplace publish."
+            exit 0
+          fi
+
+          npx tfx-cli extension publish \
+            --vsix "$VSIX_PATH" \
+            --share-with "$PUBLISHER_ID" \
+            --token "$MARKETPLACE_TOKEN" \
+            --service-url https://marketplace.visualstudio.com \
+            --no-prompt \
+            --no-wait-validation
