@@ -61,6 +61,7 @@ jobs:
         run: node scripts/update-task-manifest.js ".task/task.json" "$VERSION" "$TASK_ID"
 
       - name: Package extension
+        id: packaging
         shell: bash
         run: |
           npx tfx-cli extension create \
@@ -71,8 +72,16 @@ jobs:
 
           VSIX_PATH=$(ls -1 *.vsix | head -n 1)
           echo "VSIX_PATH=${VSIX_PATH}" >> "$GITHUB_ENV"
+          echo "VSIX_PATH=${VSIX_PATH}" >> "$GITHUB_OUTPUT"
 
           echo "Created package: ${VSIX_PATH}"
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v7
+        with:
+          path: ${{ steps.packaging.outputs.VSIX_PATH }}
+          retention-days: 30
+          archive: false
 
       - name: Publish extension to Visual Studio Marketplace
         shell: bash
