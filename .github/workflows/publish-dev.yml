@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  HUSKY: 0
+
 jobs:
   publish-dev:
     runs-on: ubuntu-latest
