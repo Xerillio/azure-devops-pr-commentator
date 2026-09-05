@@ -100,7 +100,6 @@ jobs:
 
           npx tfx-cli extension publish \
             --vsix "$VSIX_PATH" \
-            --share-with "$PUBLISHER_ID" \
             --token "$MARKETPLACE_TOKEN" \
             --service-url https://marketplace.visualstudio.com \
             --no-prompt \
