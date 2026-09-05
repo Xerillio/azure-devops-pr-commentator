@@ -38,7 +38,7 @@ jobs:
         run: |
           if [[ ! "${VERSION}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Release tag '${VERSION}' is not compatible with the Azure DevOps task version format (<major>.<minor>.<patch>)."
-            echo "Example: \"v1.20260904.10\" (the leading \"v\" is optional")."
+            echo "Example: \"v1.20260904.10\" (the leading \"v\" is optional)."
             exit 1
           fi
 
