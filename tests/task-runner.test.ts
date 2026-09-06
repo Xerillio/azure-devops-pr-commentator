@@ -47,7 +47,7 @@ describe("TaskRunner", () => {
     });
 });
 
-function createStubValidatorFactory(isSuccess: boolean = true): StubbedInstance<IValidatorFactory> {
+function createStubValidatorFactory(isSuccess = true): StubbedInstance<IValidatorFactory> {
     const stubFactory = stubInterface<IValidatorFactory>();
 
     stubFactory.createValidators

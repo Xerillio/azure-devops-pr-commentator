@@ -372,7 +372,7 @@ function formatMultiline(text: string): string {
     const matches = rexFirstLineIndentation.exec(result);
     const indentation = matches?.[1].length ?? 0;
     if (indentation > 0) {
-        const rexIndentation = new RegExp(`^[ \t]{0,${indentation}}`, "gm");
+        const rexIndentation = new RegExp(`^[ \t]{0,${indentation.toString()}}`, "gm");
         result = result.replace(rexIndentation, "");
     }
     return result;

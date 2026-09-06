@@ -1,20 +1,21 @@
+import type { IRequestHandler } from "azure-devops-node-api/interfaces/common/VsoBaseInterfaces";
 import rewiremock from "rewiremock";
 import sinon from "ts-sinon";
 
-export const testInputs = new Map<string, any>();
-export const testVariables = new Map<string, any>();
-let minimatchStub: { minimatch: sinon.SinonStub<[string, string], boolean> };
+export const testInputs = new Map<string, unknown>();
+export const testVariables = new Map<string, unknown>();
+let minimatchStub: { minimatch: sinon.SinonStub<[string, string], boolean> } | undefined;
 
 const adoNodeApiStubDefaults = {
     getPersonalAccessTokenHandler: sinon.stub().callsFake((_: string) => undefined),
     getBearerHandler: sinon.stub().callsFake((_: string) => undefined),
-    WebApi: sinon.stub().callsFake((collectionUri: string, __: any) => ({
+    WebApi: sinon.stub().callsFake((_: string, __: IRequestHandler) => ({
         getGitApi: sinon.stub().callsFake(() => undefined)
     }))
 };
 const adoNodeApiStub = { ...adoNodeApiStubDefaults };
 
-export function rewire(moduleStubs: Map<string, any>): void {
+export function rewire(moduleStubs: Map<string, unknown>): void {
     for (const [module, stub] of moduleStubs) {
         rewiremock(module).with(stub);
     }
@@ -55,6 +56,9 @@ export function resetStubs(): void {
 }
 
 export function setMinimatchStub(stub: sinon.SinonStub<[string, string], boolean>): void {
+    if (minimatchStub === undefined) {
+        throw new Error("resetStubs must be called before this function");
+    }
     minimatchStub.minimatch = stub;
 }
 
