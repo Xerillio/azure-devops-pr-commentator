@@ -43,7 +43,7 @@ describe("FileGlobValidator", () => {
             const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
-            expect(result.context?.files).to.have.members([fileGlob]);
+            expect(result.context.files).to.have.members([fileGlob]);
         });
 
         it("should succeed when fileGlob matches one file on second page of changes", async() => {
@@ -60,7 +60,7 @@ describe("FileGlobValidator", () => {
             const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
-            expect(result.context?.files).to.have.members([fileGlob]);
+            expect(result.context.files).to.have.members([fileGlob]);
             const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
             sinon.assert.calledTwice(getPullRequestIterationChanges);
         });
@@ -79,7 +79,7 @@ describe("FileGlobValidator", () => {
             const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
-            expect(result.context?.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
+            expect(result.context.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
             const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
             sinon.assert.calledTwice(getPullRequestIterationChanges);
         });

@@ -52,9 +52,9 @@ describe("GitApiExtension", () => {
 
 function createStubGitApi(stubRestGet?: sinon.SinonStub): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
-    stubGitApi.rest = {
+    stubGitApi.rest = Object.assign(stubGitApi.rest, {
         get: stubRestGet ?? createStubRestGet()
-    } as any;
+    });
     stubGitApi.formatResponse
         .withArgs("commits page 1", sinon.match.any, sinon.match.any)
         .returns(pageOneCommits())

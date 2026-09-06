@@ -8,7 +8,7 @@ import { createStubInputs, createStubVariables } from "../stub-helper";
 
 describe("ValidatorFactory", () => {
     describe("#createValidators()", () => {
-        it("should return all validators", async() => {
+        it("should return all validators", () => {
             const sut = new ValidatorFactory(createStubGitApi(), createStubInputs(), createStubVariables());
 
             const result = sut.createValidators();

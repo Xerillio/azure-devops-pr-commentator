@@ -21,7 +21,7 @@ export interface IAutoCommentThread extends GitInterfaces.GitPullRequestCommentT
 }
 
 export interface IAutoCommentThreadProperties {
-    [key: string]: any
+    [key: string]: unknown
     hash: IAutoCommentThreadPropertiesHash
 }
 

@@ -39,7 +39,7 @@ export class CommitExpressionValidator implements IValidator {
         };
     };
 
-    private readonly getMatchingCommits = async(commitExpr: string): Promise<Array<GitInterfaces.GitCommitRef & IWellFormedCommit>> => {
+    private readonly getMatchingCommits = async(commitExpr: string): Promise<(GitInterfaces.GitCommitRef & IWellFormedCommit)[]> => {
         const commits = await this.client.getAllPullRequestCommits();
         const rex = new RegExp(commitExpr);
 

@@ -13,11 +13,11 @@ export class GitApiExtension {
     ) {}
 
     public readonly getAllPullRequestCommits = async(): Promise<GitInterfaces.GitCommitRef[]> => {
-        const url = `${this.baseRepositoryUrl}/pullRequests/${this.vars.pullRequestId}/commits`;
+        const url = `${this.baseRepositoryUrl}/pullRequests/${this.vars.pullRequestId.toString()}/commits`;
         return await this.page(url, GitInterfaces.TypeInfo.GitCommitRef);
     };
 
-    private readonly page = async<T>(url: string, responseTypeMetadata: any, continuationToken?: string): Promise<T[]> => {
+    private readonly page = async<T>(url: string, responseTypeMetadata: unknown, continuationToken?: string): Promise<T[]> => {
         const queryParams = [GitApiExtension.pageSizeParam, GitApiExtension.apiVersionParam];
         if (continuationToken !== undefined) {
             queryParams.push(`continuationToken=${continuationToken}`);
@@ -32,11 +32,10 @@ export class GitApiExtension {
             : result;
     };
 
-    private readonly getContinuationToken = (headers: any): string | undefined => {
-        const hasToken = Object.getOwnPropertyNames(headers)
-            .includes(GitApiExtension.continuationTokenHeaderKey) &&
+    private readonly getContinuationToken = (headers: object): string | undefined => {
+        const hasToken = GitApiExtension.continuationTokenHeaderKey in headers &&
             typeof headers[GitApiExtension.continuationTokenHeaderKey] === "string";
-        return hasToken ? headers[GitApiExtension.continuationTokenHeaderKey] : undefined;
+        return hasToken ? headers[GitApiExtension.continuationTokenHeaderKey] as string : undefined;
     };
 
     private get baseRepositoryUrl(): string {

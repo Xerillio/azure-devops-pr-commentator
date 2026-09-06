@@ -24,6 +24,7 @@
     },
     "license": "MIT",
     "devDependencies": {
+        "@eslint/js": "^9.39.5",
         "@stylistic/eslint-plugin": "^5.10.0",
         "@types/chai": "^5.2.3",
         "@types/chai-as-promised": "^8.0.2",
@@ -38,7 +39,6 @@
         "chai-as-promised": "^8.0.2",
         "cpy-cli": "^7.0.0",
         "eslint": "^9.39.5",
-        "eslint-config-love": "^155.0.0",
         "eslint-formatter-friendly": "github:xerillio/eslint-formatter-friendly#af80c289aa56feb587b9cd3bfc370ce42aba3eca",
         "husky": "^9.1.7",
         "mocha": "^12.0.0",
@@ -51,7 +51,8 @@
         "tfx-cli": "^0.24.0",
         "ts-node": "^10.9.2",
         "ts-sinon": "^2.0.2",
-        "typescript": "^6.0.3"
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.69.0"
     },
     "dependencies": {
         "azure-devops-node-api": "^17.0.0",
