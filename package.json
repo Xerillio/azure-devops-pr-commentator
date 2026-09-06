@@ -19,6 +19,7 @@
         "coverage-html": "c8 --reporter=html npm test",
         "coverage-sonar": "c8 --reporter=lcovonly npm run test-sonar",
         "lint": "eslint . --ext .ts -f friendly",
+        "lint-overview": "eslint . --ext .ts",
         "lint-fix": "eslint . --ext .ts -f friendly --fix"
     },
     "license": "MIT",
