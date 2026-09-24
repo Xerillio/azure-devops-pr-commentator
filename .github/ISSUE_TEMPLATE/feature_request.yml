@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an improvement or new capability for the project.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Please describe the problem, the proposed solution, and what success looks like.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What problem are you trying to solve, or what workflow would this improve?
+      placeholder: Describe the current limitation or pain point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or behavior you would like to see.
+      placeholder: Outline the intended behavior, configuration, or formats.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What would make this feature complete?
+      placeholder: |
+        - Example outcome 1
+        - Example outcome 2
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add mocks, sample YAML, screenshots, links, or references.
+    validations:
+      required: false
