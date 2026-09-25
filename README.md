@@ -7,7 +7,7 @@ Improve your code review process by automating comments to avoid common mistakes
 Install the extension in your collection and create a pipeline. Add the `PrCommentator` task to the YAML file and configure the inputs as you see fit:
 
 ```yml
-- task: PrCommentator@0
+- task: PrCommentator@1
   inputs:
    comment: 'Files in /foo/ should only be auto-generated. Did you update /foo-generator.json first?'
    fileGlob: '/foo/**/*'
