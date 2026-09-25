@@ -1,0 +1,56 @@
+# Pipeline without secrets access to run for pull requests from forks
+# https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/ci-based-analysis/github-actions-for-sonarcloud#analyzing-fork-pull-requests
+name: CI on forks - build and test
+
+on:
+  pull_request:
+
+env:
+  HUSKY: 0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork == true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - run: npm ci
+      - run: npm run coverage-sonar # Produces test and coverage reports
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output-${{ github.event.pull_request.number }}
+          retention-days: 1
+          path: |
+            coverage/lcov.info
+            test-report.sonar.xml
+
+      - name: Save PR information
+        env:
+          REPO_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          mkdir -p pr-info
+          echo "$REPO_NAME" > pr-info/repo-name
+          echo "$HEAD_REF" > pr-info/head-ref
+          echo "$HEAD_SHA" > pr-info/head-sha
+          echo "$PR_NUMBER" > pr-info/pr-number
+          echo "$BASE_REF" > pr-info/base-ref
+
+      - name: Upload PR information
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-info-${{ github.event.pull_request.number }}
+          path: pr-info/
+          retention-days: 1
