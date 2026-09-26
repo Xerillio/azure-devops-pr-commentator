@@ -31,7 +31,7 @@ describe("FileGlobValidator", () => {
             expect(result.context).to.deep.equal({});
         });
 
-        it("should succeed when fileGlob matches one file", async() => {
+        it("should succeed when fileGlob matches one file (default mode 'any:')", async() => {
             const fileGlob = "/foo/bar.txt";
             const stubInputs = createStubInputs({ fileGlob });
             const stubApiClient = createStubGitApi();
@@ -44,6 +44,21 @@ describe("FileGlobValidator", () => {
 
             expect(result.conditionMet).is.true;
             expect(result.context.files).to.have.members([fileGlob]);
+        });
+
+        it("should succeed with 'any:' when at least one changed file matches the pattern", async() => {
+            const fileGlob = "any:/foo/bar.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.have.members(["/foo/bar.txt"]);
         });
 
         it("should succeed when fileGlob contains multiple globs on separate lines", async() => {
@@ -111,7 +126,7 @@ describe("FileGlobValidator", () => {
             const result = await sut.check({});
 
             expect(result.conditionMet).is.true;
-            expect(result.context.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
+            expect(result.context.files).to.have.members(["/foo/bar.txt", "/foo2/bar2.txt", "/baz/qux.txt"]);
             const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
             sinon.assert.calledTwice(getPullRequestIterationChanges);
         });
@@ -130,6 +145,108 @@ describe("FileGlobValidator", () => {
             expect(result.context).to.deep.equal({});
             const getPullRequestIterationChanges = getStubMethod(stubApiClient, "getPullRequestIterationChanges");
             sinon.assert.calledTwice(getPullRequestIterationChanges);
+        });
+
+        it("should treat a '!pattern' entry as 'any:!pattern'", async() => {
+            const fileGlob = "!/foo/bar.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, _: string) => path !== "/foo/bar.txt");
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.have.members(["/foo2/bar2.txt"]);
+        });
+
+        it("should fail with 'all:' when not every changed file matches the pattern", async() => {
+            const fileGlob = "all:/foo/bar.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.false;
+        });
+
+        it("should succeed with 'all:' when every changed file matches the pattern", async() => {
+            const fileGlob = "all:/**/*";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((_: string, __: string) => true);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.have.members(["/foo/bar.txt", "/foo2/bar2.txt"]);
+        });
+
+        it("should succeed with 'none:' when no changed file matches the pattern", async() => {
+            const fileGlob = "none:/match/nothing";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((_: string, __: string) => false);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files ?? []).to.have.lengthOf(0);
+        });
+
+        it("should fail with 'none:' when a changed file matches the pattern", async() => {
+            const fileGlob = "none:/foo/bar.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.false;
+        });
+
+        it("should combine mixed 'any:' and 'none:' entries with AND semantics", async() => {
+            const fileGlob = "any:/foo/bar.txt\nnone:/foo2/bar2.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.false;
+        });
+
+        it("should succeed when mixed 'any:' and 'none:' entries are both satisfied", async() => {
+            const fileGlob = "any:/foo/bar.txt\nnone:/match/nothing";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.have.members(["/foo/bar.txt"]);
         });
     });
 });
@@ -151,6 +268,12 @@ const pageOneIterationChanges = (): GitPullRequestIterationChanges => ({
             item: {
                 path: "/foo/bar.txt"
             }
+        },
+        {
+            changeId: 2,
+            item: {
+                path: "/foo2/bar2.txt"
+            }
         }
     ],
     nextSkip: 1,
@@ -160,7 +283,7 @@ const pageOneIterationChanges = (): GitPullRequestIterationChanges => ({
 const pageTwoIterationChanges = (): GitPullRequestIterationChanges => ({
     changeEntries: [
         {
-            changeId: 2,
+            changeId: 3,
             item: {
                 path: "/baz/qux.txt"
             }

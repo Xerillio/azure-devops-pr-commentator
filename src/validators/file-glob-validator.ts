@@ -6,6 +6,17 @@ import { hasId } from "../type-guards";
 import type { IResultContext, IValidationResult, IValidator } from "./validator";
 import { type IVariables } from "../variables";
 
+/** The supported matching modes for a single {@link FileGlobEntry}. */
+type FileGlobMode = "any" | "all" | "none";
+
+/** A single parsed line of the `fileGlob` input, e.g. `any:` followed by a glob pattern. */
+interface FileGlobEntry {
+    readonly mode: FileGlobMode
+    readonly pattern: string
+}
+
+const FILE_GLOB_PREFIX_PATTERN = /^(any|all|none):(.*)$/;
+
 export class FileGlobValidator implements IValidator {
     private readonly repositoryId: string;
     private readonly prId: number;
@@ -20,39 +31,80 @@ export class FileGlobValidator implements IValidator {
     }
 
     public readonly check = async(resultContext: IResultContext): Promise<IValidationResult> => {
-        const fileGlobs = this.getFileGlobs();
-        if (fileGlobs.length === 0) {
+        const fileGlobEntries = this.getFileGlobs();
+        if (fileGlobEntries.length === 0) {
             return { conditionMet: true, context: resultContext };
         }
 
-        const matchingChanges = await this.getMatchingChanges(fileGlobs);
-        if (matchingChanges.length > 0) {
-            console.log("Found the following matches for the glob expression:\n    " +
-                matchingChanges.map(c => c.item?.path).join("\n    "));
-            return {
-                conditionMet: true,
-                context: {
-                    ...resultContext,
-                    files: [...new Set(matchingChanges.map(change => change.item?.path ?? ""))]
-                }
-            };
+        const changedPaths = (await this.getAllChanges()).map(change => change.item?.path ?? "");
+        const matchingFiles = new Set<string>();
+
+        for (const entry of fileGlobEntries) {
+            const matchedPaths = changedPaths.filter(path => minimatch(path, entry.pattern));
+            const conditionMet = this.isConditionMet(entry.mode, changedPaths, matchedPaths);
+
+            console.log(this.describeEntryResult(entry, conditionMet, matchedPaths));
+            if (!conditionMet) {
+                return { conditionMet: false, context: resultContext };
+            }
+
+            matchedPaths.forEach(path => matchingFiles.add(path));
         }
 
-        console.log("No match found for the glob expression");
-        return { conditionMet: false, context: resultContext };
+        return {
+            conditionMet: true,
+            context: { ...resultContext, files: [...matchingFiles] }
+        };
     };
 
-    private readonly getFileGlobs = (): string[] => (this.inputs.fileGlob ?? "")
+    private readonly getFileGlobs = (): FileGlobEntry[] => (this.inputs.fileGlob ?? "")
         .split(/\r?\n/)
         .map(glob => glob.trim())
-        .filter(glob => glob.length > 0);
+        .filter(glob => glob.length > 0)
+        .map(this.parseFileGlobEntry);
 
-    private readonly getMatchingChanges = async(fileGlobs: string[]): Promise<GitInterfaces.GitPullRequestChange[]> => {
+    private readonly parseFileGlobEntry = (line: string): FileGlobEntry => {
+        const match = FILE_GLOB_PREFIX_PATTERN.exec(line);
+        if (match === null) {
+            return { mode: "any", pattern: line };
+        }
+
+        return { mode: match[1] as FileGlobMode, pattern: match[2] };
+    };
+
+    /**
+     * Evaluates whether the changed paths satisfy the given matching {@link mode} for a single
+     * `fileGlob` entry.
+     * @param mode The matching mode of the entry, i.e. `any`, `all`, or `none`.
+     * @param changedPaths All file paths changed in the pull request.
+     * @param matchedPaths The subset of {@link changedPaths} that matched the entry's pattern.
+     */
+    private readonly isConditionMet = (mode: FileGlobMode, changedPaths: string[], matchedPaths: string[]): boolean => {
+        switch (mode) {
+            case "any":
+                return matchedPaths.length > 0;
+            case "all":
+                return changedPaths.length > 0 && matchedPaths.length === changedPaths.length;
+            case "none":
+                return matchedPaths.length === 0;
+        }
+    };
+
+    private readonly describeEntryResult = (entry: FileGlobEntry, conditionMet: boolean, matchedPaths: string[]): string => {
+        const label = `${entry.mode}:${entry.pattern}`;
+        if (!conditionMet) {
+            return `Condition '${label}' was not met. Remaining conditions will be skipped.`;
+        }
+
+        return matchedPaths.length > 0
+            ? `Condition '${label}' was met for:\n    ${matchedPaths.join("\n    ")}`
+            : `Condition '${label}' was met`;
+    };
+
+    private readonly getAllChanges = async(): Promise<GitInterfaces.GitPullRequestChange[]> => {
         const lastIterationId = await this.getLastIterationId();
         let changes: GitInterfaces.GitPullRequestIterationChanges | undefined;
-        const matchingChanges: GitInterfaces.GitPullRequestChange[] = [];
-        const matchesGlob = (changeEntry: GitInterfaces.GitPullRequestChange): boolean =>
-            fileGlobs.some(fileGlob => minimatch(changeEntry.item?.path ?? "", fileGlob));
+        const allChanges: GitInterfaces.GitPullRequestChange[] = [];
 
         do {
             changes = await this.client.getPullRequestIterationChanges(
@@ -63,11 +115,10 @@ export class FileGlobValidator implements IValidator {
                 changes?.nextTop,
                 changes?.nextSkip);
 
-            const matches = changes.changeEntries?.filter(matchesGlob) ?? [];
-            matchingChanges.push(...matches);
+            allChanges.push(...changes.changeEntries ?? []);
         } while (changes.nextTop !== undefined && changes.nextTop > 0);
 
-        return matchingChanges;
+        return allChanges;
     };
 
     private readonly getLastIterationId = async(): Promise<number> => {
