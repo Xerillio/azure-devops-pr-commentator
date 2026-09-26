@@ -5,6 +5,7 @@ import { type IInputs } from "../inputs";
 import { hasId } from "../type-guards";
 import type { IResultContext, IValidationResult, IValidator } from "./validator";
 import { type IVariables } from "../variables";
+import { throwError } from "../utilities";
 
 /** The supported matching modes for a single {@link FileGlobEntry}. */
 type FileGlobMode = "any" | "all" | "none";
@@ -126,6 +127,6 @@ export class FileGlobValidator implements IValidator {
         return iterations
             .filter(hasId)
             .sort((i1, i2) => i1.id - i2.id)
-            .slice(-1)[0].id;
+            .at(-1)?.id ?? throwError("No PR iterations found");
     };
 }
