@@ -33,11 +33,11 @@
         },
         {
             "name": "fileGlob",
-            "type": "string",
+            "type": "multiLine",
             "label": "File glob",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "If specified, a file in the pull request must match this glob expression for a comment to be added."
+            "helpMarkDown": "If specified, a file in the pull request must match one of these glob expressions. Enter one glob per line."
         },
         {
             "name": "commitExpr",

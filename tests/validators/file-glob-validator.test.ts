@@ -46,6 +46,38 @@ describe("FileGlobValidator", () => {
             expect(result.context.files).to.have.members([fileGlob]);
         });
 
+        it("should succeed when fileGlob contains multiple globs on separate lines", async() => {
+            const fileGlob = "/foo/bar.txt\n/baz/qux.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            stubApiClient.getPullRequestIterationChanges
+                .onSecondCall().resolves(pageTwoIterationChanges());
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((path: string, pattern: string) => path === pattern);
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.have.members(["/foo/bar.txt", "/baz/qux.txt"]);
+        });
+
+        it("should de-duplicate files when multiple globs match the same path", async() => {
+            const fileGlob = "/foo/*.txt\n/foo/bar.txt";
+            const stubInputs = createStubInputs({ fileGlob });
+            const stubApiClient = createStubGitApi();
+            const minimatchStub = sinon.stub<[string, string], boolean>()
+                .callsFake((_: string, __: string) => true); // All globs match all files
+            setMinimatchStub(minimatchStub);
+            const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
+
+            const result = await sut.check({});
+
+            expect(result.conditionMet).is.true;
+            expect(result.context.files).to.deep.equal(["/foo/bar.txt"]);
+        });
+
         it("should succeed when fileGlob matches one file on second page of changes", async() => {
             const fileGlob = "/baz/qux.txt";
             const stubInputs = createStubInputs({ fileGlob });

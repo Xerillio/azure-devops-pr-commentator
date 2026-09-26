@@ -10,7 +10,9 @@ Install the extension in your collection and create a pipeline. Add the `PrComme
 - task: PrCommentator@1
   inputs:
    comment: 'Files in /foo/ should only be auto-generated. Did you update /foo-generator.json first?'
-   fileGlob: '/foo/**/*'
+   fileGlob: |
+     /foo/**/*
+     /foo-generator.json
 ```
 
 This will generate a comment like the following:

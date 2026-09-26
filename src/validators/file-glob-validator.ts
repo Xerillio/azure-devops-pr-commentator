@@ -20,11 +20,12 @@ export class FileGlobValidator implements IValidator {
     }
 
     public readonly check = async(resultContext: IResultContext): Promise<IValidationResult> => {
-        if (this.inputs.fileGlob === undefined) {
+        const fileGlobs = this.getFileGlobs();
+        if (fileGlobs.length === 0) {
             return { conditionMet: true, context: resultContext };
         }
 
-        const matchingChanges = await this.getMatchingChanges(this.inputs.fileGlob);
+        const matchingChanges = await this.getMatchingChanges(fileGlobs);
         if (matchingChanges.length > 0) {
             console.log("Found the following matches for the glob expression:\n    " +
                 matchingChanges.map(c => c.item?.path).join("\n    "));
@@ -32,7 +33,7 @@ export class FileGlobValidator implements IValidator {
                 conditionMet: true,
                 context: {
                     ...resultContext,
-                    files: matchingChanges.map(change => change.item?.path ?? "")
+                    files: [...new Set(matchingChanges.map(change => change.item?.path ?? ""))]
                 }
             };
         }
@@ -41,12 +42,17 @@ export class FileGlobValidator implements IValidator {
         return { conditionMet: false, context: resultContext };
     };
 
-    private readonly getMatchingChanges = async(fileGlob: string): Promise<GitInterfaces.GitPullRequestChange[]> => {
+    private readonly getFileGlobs = (): string[] => (this.inputs.fileGlob ?? "")
+        .split(/\r?\n/)
+        .map(glob => glob.trim())
+        .filter(glob => glob.length > 0);
+
+    private readonly getMatchingChanges = async(fileGlobs: string[]): Promise<GitInterfaces.GitPullRequestChange[]> => {
         const lastIterationId = await this.getLastIterationId();
         let changes: GitInterfaces.GitPullRequestIterationChanges | undefined;
         const matchingChanges: GitInterfaces.GitPullRequestChange[] = [];
         const matchesGlob = (changeEntry: GitInterfaces.GitPullRequestChange): boolean =>
-            minimatch(changeEntry.item?.path ?? "", fileGlob);
+            fileGlobs.some(fileGlob => minimatch(changeEntry.item?.path ?? "", fileGlob));
 
         do {
             changes = await this.client.getPullRequestIterationChanges(
