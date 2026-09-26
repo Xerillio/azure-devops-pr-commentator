@@ -1,5 +1,5 @@
 import { type IInputs } from "../inputs";
-import type { IResultContext, IValidationResult, IValidator } from "./validator";
+import type { IValidator, IResultContext, IValidationResult } from "../interfaces/validator";
 import { type IGitApi } from "azure-devops-node-api/GitApi";
 import { type IVariables } from "../variables";
 

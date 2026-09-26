@@ -4,7 +4,7 @@ import { type IVariables } from "../variables";
 import { CommitExpressionValidator } from "./commit-expression-validator";
 import { FileGlobValidator } from "./file-glob-validator";
 import { SourceBranchValidator } from "./source-branch-validator";
-import { type IValidator } from "./validator";
+import { type IValidator } from "../interfaces/validator";
 
 export class ValidatorFactory implements IValidatorFactory {
     constructor(

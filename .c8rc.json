@@ -2,7 +2,7 @@
     "all": true,
     "src": "src",
     "include": ["src"],
-    "exclude": ["src/index.ts"],
+    "exclude": ["src/index.ts", "src/interfaces/**/*.ts"],
     "extension": [".ts"],
     "report-dir": "./coverage"
 }

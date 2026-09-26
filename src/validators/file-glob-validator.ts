@@ -3,7 +3,7 @@ import type * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfa
 import { minimatch } from "minimatch";
 import { type IInputs } from "../inputs";
 import { hasId } from "../type-guards";
-import type { IResultContext, IValidationResult, IValidator } from "./validator";
+import type { IValidator, IResultContext, IValidationResult } from "../interfaces/validator";
 import { type IVariables } from "../variables";
 import { throwError } from "../utilities";
 

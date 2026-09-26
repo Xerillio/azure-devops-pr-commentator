@@ -5,7 +5,7 @@ import sinon, { stubInterface, type StubbedInstance } from "ts-sinon";
 import { Commentator } from "../src/commentator";
 import { Resources } from "../src/resources";
 import { type IAutoCommentThread } from "../src/type-guards";
-import { type IResultContext } from "../src/validators/validator";
+import { type IResultContext } from "../src/interfaces/validator";
 import { createStubInputs, getStubMethod } from "./stub-helper";
 
 describe("Commentator", () => {

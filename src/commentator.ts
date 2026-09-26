@@ -4,7 +4,7 @@ import { COMMIT_HASH_LENGTH, MAX_COMMIT_MESSAGE_LENGTH } from "./constants";
 import { type IInputs } from "./inputs";
 import { Resources } from "./resources";
 import { isAutoCommentThread } from "./type-guards";
-import { type IResultContext } from "./validators/validator";
+import { IResultContext } from "./interfaces/validator";
 
 export class Commentator implements ICommentator {
     constructor(

@@ -1,7 +1,7 @@
 import type * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
 import { type IInputs } from "../inputs";
 import { type IWellFormedCommit, isWellFormedCommit } from "../type-guards";
-import type { IResultContext, IValidationResult, IValidator } from "./validator";
+import type { IValidator, IResultContext, IValidationResult } from "../interfaces/validator";
 import { type IGitApiExtension } from "../git-api-extension";
 
 /**
