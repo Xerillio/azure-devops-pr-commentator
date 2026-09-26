@@ -14,7 +14,7 @@ export class Variables implements IVariables {
     }
 
     public get pullRequestId(): number {
-        return parseInt(Variables.getRequiredVariable("SYSTEM_PULLREQUEST_PULLREQUESTID"));
+        return Number.parseInt(Variables.getRequiredVariable("SYSTEM_PULLREQUEST_PULLREQUESTID"));
     }
 
     public get projectName(): string {
