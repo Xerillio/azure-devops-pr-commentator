@@ -58,7 +58,7 @@
         {
             "name": "sourceBranch",
             "type": "string",
-            "label": "File glob",
+            "label": "Source branch name expression",
             "defaultValue": "",
             "required": false,
             "helpMarkDown": "(Not implemented) The source branch name must match this regular expression."
@@ -69,7 +69,7 @@
             "label": "Auto-resolve comments",
             "defaultValue": false,
             "required": false,
-            "helpMarkDown": "(Not implemented) The source branch name must match this regular expression."
+            "helpMarkDown": "(Not implemented) Toggle whether to automatically resolve previously created comments if the conditions are no longer met."
         }
     ],
     "execution": {
