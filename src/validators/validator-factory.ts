@@ -1,9 +1,10 @@
+import { type IGitApiExtension } from "../git-api-extension";
 import { type IInputs } from "../inputs";
 import { type IVariables } from "../variables";
-import { FileGlobValidator } from "./file-glob-validator";
-import { type IValidator } from "./validator";
 import { CommitExpressionValidator } from "./commit-expression-validator";
-import { type IGitApiExtension } from "../git-api-extension";
+import { FileGlobValidator } from "./file-glob-validator";
+import { SourceBranchValidator } from "./source-branch-validator";
+import { type IValidator } from "./validator";
 
 export class ValidatorFactory implements IValidatorFactory {
     constructor(
@@ -16,7 +17,8 @@ export class ValidatorFactory implements IValidatorFactory {
         const { client, inputs, variables } = this;
         return [
             new FileGlobValidator(client.apiClient, inputs, variables),
-            new CommitExpressionValidator(client, inputs)
+            new CommitExpressionValidator(client, inputs),
+            new SourceBranchValidator(client.apiClient, inputs, variables)
         ];
     };
 }

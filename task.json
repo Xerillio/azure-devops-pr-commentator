@@ -61,7 +61,7 @@
             "label": "Source branch name expression",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "(Not implemented) The source branch name must match this regular expression."
+            "helpMarkDown": "The source branch name must match this regular expression. If it does not match, the comment will be added."
         },
         {
             "name": "autoResolve",

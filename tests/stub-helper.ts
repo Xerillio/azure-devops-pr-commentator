@@ -8,6 +8,7 @@ export const createStubInputs = (override?: Partial<IInputs>): IInputs => ({
     comment: "test comment",
     fileGlob: "test glob",
     commitExpr: "commit expression",
+    sourceBranch: "source branch expression",
     hashedConditions: "test hash",
     ...override
 });
