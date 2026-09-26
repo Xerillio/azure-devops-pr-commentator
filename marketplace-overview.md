@@ -29,6 +29,7 @@ The task supports the following inputs:
 | `comment` | `comment: 'The is the text inserted into the comment'` | A string with the content of the comment. [Markdown](https://learn.microsoft.com/en-us/azure/devops/project/wiki/markdown-guidance?view=azure-devops) is supported. |
 | `fileGlob` | `fileGlob: 'any:/foo/**/*.js'` | One or more glob expressions, one per line. Each line may be prefixed with `any:`, `all:`  or `none:`. All lines are combined with AND logic. See details under [`fileGlob` matching modes](#fileglob-matching-modes). |
 | `commitExpr` | `commitExpr: '^(fix\|feat): #\d+ .*'` | A regular expression. The pull request must have at least one commit message that **does not** match this expression for the comment to be created. NB: no [flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#advanced_searching_with_flags) are used, which means `^`, `$` and `.` **does not** match newline characters. |
+| `sourceBranch` | `sourceBranch: ^(feature\|bugfix)/\d+-[\w\-_]+$` | A regular expression. If the pull request source branch **does not** match the expression, the comment is created. |
 
 ### `fileGlob` matching modes
 
