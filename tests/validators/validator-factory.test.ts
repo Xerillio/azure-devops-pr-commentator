@@ -3,7 +3,7 @@ import { stubInterface, type StubbedInstance } from "ts-sinon";
 import type { IGitApiExtension } from "../../src/git-api-extension";
 import { CommitExpressionValidator } from "../../src/validators/commit-expression-validator";
 import { FileGlobValidator } from "../../src/validators/file-glob-validator";
-import { SourceBranchValidator } from "../../src/validators/source-branch-validator";
+import { SourceBranchValidator, TargetBranchValidator } from "../../src/validators/branch-validator";
 import { ValidatorFactory } from "../../src/validators/validator-factory";
 import { createStubInputs, createStubVariables } from "../stub-helper";
 
@@ -15,7 +15,7 @@ describe("ValidatorFactory", () => {
             const result = sut.createValidators();
 
             expect(result).to.not.be.empty;
-            const expectedTypes = [FileGlobValidator, CommitExpressionValidator, SourceBranchValidator];
+            const expectedTypes = [FileGlobValidator, CommitExpressionValidator, SourceBranchValidator, TargetBranchValidator];
             const actualTypes = result.map(obj => obj.constructor);
             expect(actualTypes).to.deep.equal(expectedTypes);
         });

@@ -3,7 +3,7 @@ import type { IInputs } from "../inputs";
 import type { IVariables } from "../variables";
 import { CommitExpressionValidator } from "./commit-expression-validator";
 import { FileGlobValidator } from "./file-glob-validator";
-import { SourceBranchValidator } from "./source-branch-validator";
+import { SourceBranchValidator, TargetBranchValidator } from "./branch-validator";
 import type { IValidator } from "../interfaces/validator";
 
 export class ValidatorFactory implements IValidatorFactory {
@@ -18,7 +18,8 @@ export class ValidatorFactory implements IValidatorFactory {
         return [
             new FileGlobValidator(client.apiClient, inputs, variables),
             new CommitExpressionValidator(client, inputs),
-            new SourceBranchValidator(client.apiClient, inputs, variables)
+            new SourceBranchValidator(client.apiClient, inputs, variables),
+            new TargetBranchValidator(client.apiClient, inputs, variables),
         ];
     };
 }

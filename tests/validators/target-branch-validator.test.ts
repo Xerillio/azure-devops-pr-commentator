@@ -1,27 +1,27 @@
 import { expect } from "chai";
 import { stubInterface, type StubbedInstance } from "ts-sinon";
-import type { SourceBranchValidator } from "../../src/validators/branch-validator";
+import type { TargetBranchValidator } from "../../src/validators/branch-validator";
 import { createStubInputs, createStubResultContext, createStubVariables } from "../stub-helper";
 import type { IInputs } from "../../src/inputs";
 import { instantiate, clear, rewireAll, resetStubs } from "../rewire";
 import type { IGitApi } from "azure-devops-node-api/GitApi";
 import type { IVariables } from "../../src/variables";
 
-describe("SourceBranchValidator", () => {
+describe("TargetBranchValidator", () => {
     before(rewireAll);
     after(clear);
     beforeEach(resetStubs);
 
-    const createSut = async(apiClient: IGitApi, inputs: IInputs, variables: IVariables): Promise<SourceBranchValidator> =>
-        await instantiate(async(): Promise<SourceBranchValidator> => {
-            const constructor = (await import("../../src/validators/branch-validator")).SourceBranchValidator;
+    const createSut = async(apiClient: IGitApi, inputs: IInputs, variables: IVariables): Promise<TargetBranchValidator> =>
+        await instantiate(async(): Promise<TargetBranchValidator> => {
+            const constructor = (await import("../../src/validators/branch-validator")).TargetBranchValidator;
             return new constructor(apiClient, inputs, variables);
         });
 
     describe("#check()", () => {
-        it("should succeed when inputs contain no sourceBranch", async() => {
-            const stubInputs = createStubInputs({ sourceBranch: undefined });
-            const stubApiClient = createStubGitApi("refs/heads/some-branch");
+        it("should succeed when inputs contain no targetBranch", async() => {
+            const stubInputs = createStubInputs({ targetBranch: undefined });
+            const stubApiClient = createStubGitApi("refs/heads/main");
             const inputContext = createStubResultContext();
             const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
@@ -31,9 +31,9 @@ describe("SourceBranchValidator", () => {
             expect(result.context).to.deep.equal(createStubResultContext());
         });
 
-        it("should succeed when sourceBranch regex does not match the branch name", async() => {
-            const stubInputs = createStubInputs({ sourceBranch: "^(feature|bugfix)/\\d+-[\\w\\-_]+$" });
-            const stubApiClient = createStubGitApi("refs/heads/1234-new-input-added");
+        it("should succeed when targetBranch regex does not match the branch name", async() => {
+            const stubInputs = createStubInputs({ targetBranch: "^(release|hotfix)/\\d+-[\\w\\-_]+$" });
+            const stubApiClient = createStubGitApi("refs/heads/main");
             const inputContext = createStubResultContext();
             const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
@@ -43,8 +43,8 @@ describe("SourceBranchValidator", () => {
             expect(result.context).to.deep.equal(createStubResultContext());
         });
 
-        it("should succeed when pull request sourceRefName is undefined", async() => {
-            const stubInputs = createStubInputs({ sourceBranch: "some-expr" });
+        it("should succeed when pull request targetRefName is undefined", async() => {
+            const stubInputs = createStubInputs({ targetBranch: "some-expr" });
             const stubApiClient = createStubGitApi();
             const inputContext = createStubResultContext();
             const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
@@ -55,9 +55,9 @@ describe("SourceBranchValidator", () => {
             expect(result.context).to.deep.equal(createStubResultContext());
         });
 
-        it("should fail when sourceBranch regex matches the branch name", async() => {
-            const stubInputs = createStubInputs({ sourceBranch: "^(feature|bugfix)/\\d+-[\\w\\-_]+$" });
-            const stubApiClient = createStubGitApi("refs/heads/feature/1234-new-input-added");
+        it("should fail when targetBranch regex matches the branch name", async() => {
+            const stubInputs = createStubInputs({ targetBranch: "^(main|develop)$" });
+            const stubApiClient = createStubGitApi("refs/heads/main");
             const inputContext = createStubResultContext();
             const sut = await createSut(stubApiClient, stubInputs, createStubVariables());
 
@@ -69,9 +69,9 @@ describe("SourceBranchValidator", () => {
     });
 });
 
-function createStubGitApi(sourceRefName?: string): StubbedInstance<IGitApi> {
+function createStubGitApi(targetRefName?: string): StubbedInstance<IGitApi> {
     const stubGitApi = stubInterface<IGitApi>();
     stubGitApi.getPullRequestById
-        .resolves({ sourceRefName });
+        .resolves({ targetRefName });
     return stubGitApi;
 }

@@ -53,7 +53,7 @@
             "label": "Target branch name expression",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "(Not implemented) The target branch name must match this regular expression."
+            "helpMarkDown": "The target branch name must match this regular expression. If it does not match, the comment will be added."
         },
         {
             "name": "sourceBranch",
