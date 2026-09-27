@@ -42,7 +42,9 @@ export default defineConfig([
                     "ignoreRestSiblings": true
                 }
             ],
-            "@typescript-eslint/no-unsafe-member-access": ["error", { "allowOptionalChaining": true }]
+            "@typescript-eslint/no-unsafe-member-access": ["error", { "allowOptionalChaining": true }],
+            "@typescript-eslint/no-import-type-side-effects": "error",
+            "@typescript-eslint/consistent-type-imports": "error"
         }
     },
     {

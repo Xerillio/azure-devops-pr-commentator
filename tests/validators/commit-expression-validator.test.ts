@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { stubInterface, type StubbedInstance } from "ts-sinon";
-import { type CommitExpressionValidator } from "../../src/validators/commit-expression-validator";
+import type { CommitExpressionValidator } from "../../src/validators/commit-expression-validator";
 import { createStubInputs, createStubResultContext } from "../stub-helper";
-import { type IInputs } from "../../src/inputs";
+import type { IInputs } from "../../src/inputs";
 import { instantiate, clear, rewireAll, resetStubs } from "../rewire";
-import { type IGitApiExtension } from "../../src/git-api-extension";
+import type { IGitApiExtension } from "../../src/git-api-extension";
 
 describe("CommitExpressionValidator", () => {
     before(rewireAll);

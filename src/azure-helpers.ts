@@ -1,7 +1,7 @@
 import * as DevOps from "azure-devops-node-api";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type IVariables } from "./variables";
-import { type IInputs } from "./inputs";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
+import type { IVariables } from "./variables";
+import type { IInputs } from "./inputs";
 
 export async function createGitClient(inputs: IInputs, vars: IVariables): Promise<IGitApi> {
     let credHandler;

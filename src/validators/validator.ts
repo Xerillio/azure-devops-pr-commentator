@@ -1,5 +1,5 @@
-import { type IValidationResult } from "../interfaces/validator";
-import { type IValidatorFactory } from "./validator-factory";
+import type { IValidationResult } from "../interfaces/validator";
+import type { IValidatorFactory } from "./validator-factory";
 
 /**
  * Validates all conditions specified in the task inputs.

@@ -1,10 +1,10 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
 import { COMMIT_HASH_LENGTH, MAX_COMMIT_MESSAGE_LENGTH } from "./constants";
-import { type IInputs } from "./inputs";
+import type { IInputs } from "./inputs";
 import { Resources } from "./resources";
 import { isAutoCommentThread } from "./type-guards";
-import { IResultContext } from "./interfaces/validator";
+import type { IResultContext } from "./interfaces/validator";
 
 export class Commentator implements ICommentator {
     constructor(

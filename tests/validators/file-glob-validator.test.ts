@@ -1,10 +1,10 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type GitPullRequestIterationChanges } from "azure-devops-node-api/interfaces/GitInterfaces";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
+import type { GitPullRequestIterationChanges } from "azure-devops-node-api/interfaces/GitInterfaces";
 import { expect } from "chai";
 import sinon, { stubInterface, type StubbedInstance } from "ts-sinon";
-import { type IInputs } from "../../src/inputs";
-import { type FileGlobValidator } from "../../src/validators/file-glob-validator";
-import { type IVariables } from "../../src/variables";
+import type { IInputs } from "../../src/inputs";
+import type { FileGlobValidator } from "../../src/validators/file-glob-validator";
+import type { IVariables } from "../../src/variables";
 import { clear, instantiate, resetStubs, rewireAll, setMinimatchStub } from "../rewire";
 import { createStubInputs, createStubVariables, getStubMethod } from "../stub-helper";
 

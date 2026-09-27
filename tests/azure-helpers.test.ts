@@ -2,10 +2,10 @@ import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "ts-sinon";
 import { createStubInputs, createStubVariables } from "./stub-helper";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import { clear, instantiate, modifyAdoNodeApiStub, resetStubs, rewireAll } from "./rewire";
-import { type IInputs } from "../src/inputs";
-import { type IVariables } from "../src/variables";
+import type { IInputs } from "../src/inputs";
+import type { IVariables } from "../src/variables";
 
 chaiUse(chaiAsPromised);
 

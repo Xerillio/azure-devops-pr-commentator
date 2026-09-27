@@ -2,9 +2,9 @@ import { expect } from "chai";
 import sinon, { type StubbedInstance, stubInterface } from "ts-sinon";
 import { createStubCommentator, createStubVariables } from "./stub-helper";
 import { instantiate } from "./rewire";
-import { type TaskRunner } from "../src/task-runner";
-import { type ICommentator } from "../src/commentator";
-import { type IValidatorFactory } from "../src/validators/validator-factory";
+import type { TaskRunner } from "../src/task-runner";
+import type { ICommentator } from "../src/commentator";
+import type { IValidatorFactory } from "../src/validators/validator-factory";
 
 describe("TaskRunner", () => {
     const createSut = async(commentator: ICommentator, validatorFactory: IValidatorFactory): Promise<TaskRunner> =>

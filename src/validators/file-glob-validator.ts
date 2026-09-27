@@ -1,10 +1,10 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import type * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
 import { minimatch } from "minimatch";
-import { type IInputs } from "../inputs";
+import type { IInputs } from "../inputs";
 import { hasId } from "../type-guards";
 import type { IValidator, IResultContext, IValidationResult } from "../interfaces/validator";
-import { type IVariables } from "../variables";
+import type { IVariables } from "../variables";
 import { throwError } from "../utilities";
 
 /** The supported matching modes for a single {@link FileGlobEntry}. */

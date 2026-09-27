@@ -1,7 +1,7 @@
-import { type IInputs } from "../inputs";
+import type { IInputs } from "../inputs";
 import type { IValidator, IResultContext, IValidationResult } from "../interfaces/validator";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type IVariables } from "../variables";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
+import type { IVariables } from "../variables";
 
 /**
  * Runs validation against the pull request source branch using the regular expression from {@link IInputs.sourceBranch};

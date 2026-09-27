@@ -1,6 +1,6 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
-import { type IVariables } from "./variables";
+import type { IVariables } from "./variables";
 
 export class GitApiExtension {
     private static readonly apiVersionParam = "api-version=7.0";

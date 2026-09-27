@@ -1,7 +1,7 @@
-import { type IVariables } from "./variables";
+import type { IVariables } from "./variables";
 import { validateAll } from "./validators/validator";
-import { type ICommentator } from "./commentator";
-import { type IValidatorFactory } from "./validators/validator-factory";
+import type { ICommentator } from "./commentator";
+import type { IValidatorFactory } from "./validators/validator-factory";
 
 export class TaskRunner {
     private readonly repoId: string;

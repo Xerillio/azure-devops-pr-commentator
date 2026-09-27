@@ -1,6 +1,6 @@
 import { instantiate, clear, rewireAll, testVariables } from "./rewire";
 import { expect } from "chai";
-import { type Variables } from "../src/variables";
+import type { Variables } from "../src/variables";
 
 const systemCollectionUriVariable = "SYSTEM_COLLECTIONURI";
 const systemAccessTokenVariable = "SYSTEM_ACCESSTOKEN";

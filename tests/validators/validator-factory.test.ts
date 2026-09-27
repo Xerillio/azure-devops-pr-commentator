@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { stubInterface, type StubbedInstance } from "ts-sinon";
-import { type IGitApiExtension } from "../../src/git-api-extension";
+import type { IGitApiExtension } from "../../src/git-api-extension";
 import { CommitExpressionValidator } from "../../src/validators/commit-expression-validator";
 import { FileGlobValidator } from "../../src/validators/file-glob-validator";
 import { SourceBranchValidator } from "../../src/validators/source-branch-validator";

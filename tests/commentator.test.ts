@@ -1,11 +1,11 @@
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import { CommentThreadStatus } from "azure-devops-node-api/interfaces/GitInterfaces";
 import { expect } from "chai";
 import sinon, { stubInterface, type StubbedInstance } from "ts-sinon";
 import { Commentator } from "../src/commentator";
 import { Resources } from "../src/resources";
-import { type IAutoCommentThread } from "../src/type-guards";
-import { type IResultContext } from "../src/interfaces/validator";
+import type { IAutoCommentThread } from "../src/type-guards";
+import type { IResultContext } from "../src/interfaces/validator";
 import { createStubInputs, getStubMethod } from "./stub-helper";
 
 describe("Commentator", () => {

@@ -2,11 +2,11 @@ import { expect, use as chaiUse } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import sinon, { type StubbedInstance, stubInterface } from "ts-sinon";
 import { createStubVariables } from "./stub-helper";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
 import { clear, instantiate, resetStubs, rewireAll } from "./rewire";
-import { type IVariables } from "../src/variables";
-import { type GitApiExtension } from "../src/git-api-extension";
-import { type GitCommitRef } from "azure-devops-node-api/interfaces/GitInterfaces";
+import type { IVariables } from "../src/variables";
+import type { GitApiExtension } from "../src/git-api-extension";
+import type { GitCommitRef } from "azure-devops-node-api/interfaces/GitInterfaces";
 
 chaiUse(chaiAsPromised);
 

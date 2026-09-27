@@ -1,8 +1,8 @@
 import sinon from "ts-sinon";
-import { type ICommentator } from "../src/commentator";
-import { type IInputs } from "../src/inputs";
-import { type IVariables } from "../src/variables";
-import { type IResultContext } from "../src/interfaces/validator";
+import type { ICommentator } from "../src/commentator";
+import type { IInputs } from "../src/inputs";
+import type { IVariables } from "../src/variables";
+import type { IResultContext } from "../src/interfaces/validator";
 import type { validateAll } from "../src/validators/validator";
 
 export const createStubInputs = (override?: Partial<IInputs>): IInputs => ({

@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { stubInterface, type StubbedInstance } from "ts-sinon";
-import { type SourceBranchValidator } from "../../src/validators/source-branch-validator";
+import type { SourceBranchValidator } from "../../src/validators/source-branch-validator";
 import { createStubInputs, createStubResultContext, createStubVariables } from "../stub-helper";
-import { type IInputs } from "../../src/inputs";
+import type { IInputs } from "../../src/inputs";
 import { instantiate, clear, rewireAll, resetStubs } from "../rewire";
-import { type IGitApi } from "azure-devops-node-api/GitApi";
-import { type IVariables } from "../../src/variables";
+import type { IGitApi } from "azure-devops-node-api/GitApi";
+import type { IVariables } from "../../src/variables";
 
 describe("SourceBranchValidator", () => {
     before(rewireAll);

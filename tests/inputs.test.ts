@@ -1,6 +1,6 @@
 import { rewireAll, instantiate, testInputs, clear } from "./rewire";
 import { expect } from "chai";
-import { type Inputs } from "../src/inputs";
+import type { Inputs } from "../src/inputs";
 
 const patInput = "PAT";
 const commentInput = "comment";
