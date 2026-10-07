@@ -17,6 +17,7 @@ jobs:
       contents: read
     env:
       PUBLISHER_ID: ${{ vars.PUBLISHER_ID }}
+      SHARE_WITH_ID: ${{ vars.SHARE_WITH_ID }}
       MANIFEST: vss-extension.dev.json
     steps:
       - name: Check out repository
@@ -95,7 +96,7 @@ jobs:
 
           npx tfx-cli extension publish \
             --vsix "$VSIX_PATH" \
-            --share-with "$PUBLISHER_ID" \
+            --share-with "$SHARE_WITH_ID" \
             --token "$MARKETPLACE_TOKEN" \
             --service-url https://marketplace.visualstudio.com \
             --no-prompt \
