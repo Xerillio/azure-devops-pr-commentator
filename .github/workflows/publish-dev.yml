@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
     env:
-      PUBLISHER_ID: xerillio
+      PUBLISHER_ID: ${{ vars.PUBLISHER_ID }}
       MANIFEST: vss-extension.dev.json
     steps:
       - name: Check out repository
