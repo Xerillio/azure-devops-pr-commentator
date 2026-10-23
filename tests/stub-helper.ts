@@ -10,6 +10,7 @@ export const createStubInputs = (override?: Partial<IInputs>): IInputs => ({
     fileGlob: "test glob",
     commitExpr: "commit expression",
     sourceBranch: "source branch expression",
+    autoResolve: false,
     hashedConditions: "test hash",
     ...override
 });
@@ -25,6 +26,7 @@ export const createStubVariables = (override?: Partial<IVariables>): IVariables 
 
 export const createStubCommentator = (override?: Partial<ICommentator>): ICommentator => ({
     createComment: sinon.stub().returns(Promise.resolve("")),
+    resolveComment: sinon.stub().returns(Promise.resolve(false)),
     ...override
 });
 

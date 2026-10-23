@@ -2,6 +2,7 @@ import type { IVariables } from "./variables";
 import { validateAll } from "./validators/validator";
 import type { ICommentator } from "./commentator";
 import type { IValidatorFactory } from "./validators/validator-factory";
+import type { IInputs } from "./inputs";
 
 export class TaskRunner {
     private readonly repoId: string;
@@ -10,7 +11,8 @@ export class TaskRunner {
     constructor(
         private readonly commentator: ICommentator,
         private readonly validatorFactory: IValidatorFactory,
-        vars: IVariables
+        vars: IVariables,
+        private readonly inputs: IInputs
     ) {
         this.repoId = vars.repositoryId;
         this.prId = vars.pullRequestId;
@@ -24,6 +26,11 @@ export class TaskRunner {
         if (result.conditionMet) {
             const commentHash = await this.commentator.createComment(this.repoId, this.prId, result.context);
             resultMessage = `Conditions successfully met. Comment hash: ${commentHash}`;
+        } else if (this.inputs.autoResolve ?? false) {
+            const resolved = await this.commentator.resolveComment(this.repoId, this.prId);
+            if (resolved) {
+                resultMessage = "Conditions no longer met. Previous comment resolved.";
+            }
         }
 
         return {

@@ -16,7 +16,7 @@ import { GitApiExtension } from "./git-api-extension";
         const clientExtension = new GitApiExtension(client, vars);
         const valFactory = new ValidatorFactory(clientExtension, inputs, vars);
         const commentator = new Commentator(inputs, client);
-        const runner = new TaskRunner(commentator, valFactory, vars);
+        const runner = new TaskRunner(commentator, valFactory, vars, inputs);
         const result = await runner.run();
         setResult(result.succeeded ? TaskResult.Succeeded : TaskResult.Failed, result.message);
     } catch(err: unknown) {

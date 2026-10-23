@@ -355,6 +355,114 @@ describe("Commentator", () => {
             });
         });
     });
+
+    describe("#resolveComment()", () => {
+        const unresolvedStatuses = [
+            { status: CommentThreadStatus.Active, statusName: "Active" },
+            { status: CommentThreadStatus.Pending, statusName: "Pending" },
+        ];
+        unresolvedStatuses.forEach(({status, statusName}) => {
+            it(`should resolve an existing ${statusName} auto comment with the inputs hash`, async() => {
+                const stubGitApi = createStubGitApi();
+                stubGitApi.getThreads.returns(
+                    Promise.resolve<IAutoCommentThread[]>([{
+                        id: 999,
+                        status,
+                        properties: {
+                            hash: {
+                                $value: "test hash" // same as stubbed inputs
+                            }
+                        },
+                        comments: [{ content: "not important" }]
+                    }])
+                );
+                stubGitApi.updateThread.returns(Promise.resolve({}));
+
+                const sut = new Commentator(createStubInputs(), stubGitApi);
+                const result = await sut.resolveComment("foo", 7357);
+
+                expect(result).to.be.true;
+                sinon.assert.calledOnce(getStubMethod(stubGitApi, "updateThread"));
+                sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
+                    sinon.match({ status: CommentThreadStatus.Fixed }),
+                    "foo",
+                    7357,
+                    999);
+            });
+        });
+
+        it("should not update the thread if no matching auto comment exists", async() => {
+            const stubGitApi = createStubGitApi();
+            stubGitApi.getThreads.returns(
+                Promise.resolve<IAutoCommentThread[]>([{
+                    id: 999,
+                    properties: {
+                        hash: {
+                            $value: "a different hash"
+                        }
+                    },
+                    comments: [{ content: "not important" }]
+                }])
+            );
+
+            const sut = new Commentator(createStubInputs(), stubGitApi);
+            const result = await sut.resolveComment("foo", 7357);
+
+            expect(result).to.be.false;
+            sinon.assert.notCalled(getStubMethod(stubGitApi, "updateThread"));
+        });
+
+        const resolvedStatuses = [
+            { status: CommentThreadStatus.Fixed, statusName: "Fixed" },
+            { status: CommentThreadStatus.WontFix, statusName: "WontFix" },
+            { status: CommentThreadStatus.ByDesign, statusName: "ByDesign" },
+        ];
+        resolvedStatuses.forEach(({status, statusName}) => {
+            it(`should not update the thread if it is already in status ${statusName}`, async() => {
+                const stubGitApi = createStubGitApi();
+                stubGitApi.getThreads.returns(
+                    Promise.resolve<IAutoCommentThread[]>([{
+                        id: 999,
+                        status,
+                        properties: {
+                            hash: {
+                                $value: "test hash"
+                            }
+                        },
+                        comments: [{ content: "not important" }]
+                    }])
+                );
+    
+                const sut = new Commentator(createStubInputs(), stubGitApi);
+                const result = await sut.resolveComment("foo", 7357);
+                
+                expect(result).to.be.false;
+                sinon.assert.notCalled(getStubMethod(stubGitApi, "updateThread"));
+            });
+        });
+
+        it("should not update the thread if its status is undefined", async() => {
+            const stubGitApi = createStubGitApi();
+            stubGitApi.getThreads.returns(
+                Promise.resolve<IAutoCommentThread[]>([{
+                    id: 999,
+                    status: undefined,
+                    properties: {
+                        hash: {
+                            $value: "test hash"
+                        }
+                    },
+                    comments: [{ content: "not important" }]
+                }])
+            );
+
+            const sut = new Commentator(createStubInputs(), stubGitApi);
+            const result = await sut.resolveComment("foo", 7357);
+            
+            expect(result).to.be.false;
+            sinon.assert.notCalled(getStubMethod(stubGitApi, "updateThread"));
+        });
+    });
 });
 
 /**

@@ -29,6 +29,37 @@ export class Commentator implements ICommentator {
         return commentHash;
     };
 
+    public readonly resolveComment = async(repositoryId: string, prId: number): Promise<boolean> => {
+        const commentHash = this.inputs.hashedConditions;
+
+        const prThreads = await this.client.getThreads(repositoryId, prId);
+        const existingThread = prThreads.filter(isAutoCommentThread)
+            .find(thread => thread.isDeleted !== true && thread.properties.hash.$value === commentHash);
+
+        if (existingThread?.id === undefined) {
+            console.log(`There was no existing comment with the hash: ${commentHash}`);
+            return false;
+        }
+
+        const threadStatus = existingThread.status ?? GitInterfaces.CommentThreadStatus.Unknown;
+        const isOpenThread = threadStatus === GitInterfaces.CommentThreadStatus.Active ||
+            threadStatus === GitInterfaces.CommentThreadStatus.Pending;
+
+        if (!isOpenThread) {
+            console.log(`Comment with the hash: ${commentHash} is already resolved or closed.`);
+            return false;
+        }
+
+        const resolvedThread: GitInterfaces.GitPullRequestCommentThread = {
+            id: existingThread.id,
+            status: GitInterfaces.CommentThreadStatus.Fixed
+        };
+
+        await this.client.updateThread(resolvedThread, repositoryId, prId, existingThread.id);
+        console.log(`Resolved comment with the hash: ${commentHash}`);
+        return true;
+    };
+
     private readonly createNewThread = async(
         commentHash: string,
         repositoryId: string,
@@ -123,4 +154,5 @@ export class Commentator implements ICommentator {
 
 export interface ICommentator {
     createComment: (repositoryId: string, prId: number, context: IResultContext) => Promise<string>
+    resolveComment: (repositoryId: string, prId: number) => Promise<boolean>
 }

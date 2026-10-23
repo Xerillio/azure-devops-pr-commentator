@@ -13,6 +13,7 @@ Install the extension in your collection and create a pipeline. Add the `PrComme
    fileGlob: |
      any:/foo/**/*
      none:/foo-generator.json
+   autoResolve: true
 ```
 
 This will generate a comment like the following:
@@ -27,6 +28,7 @@ The task supports the following inputs:
 | --- | --- | --- |
 | `PAT` | `PAT: 'abd123'` | A [Personal Access Token](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the identity used to create the comments. If not specified, the pipeline's build service user is used. |
 | `comment` | `comment: 'The is the text inserted into the comment'` | A string with the content of the comment. [Markdown](https://learn.microsoft.com/en-us/azure/devops/project/wiki/markdown-guidance?view=azure-devops) is supported. |
+| `autoResolve` | `autoResolve: true` | Optional boolean. When enabled, the task resolves a previously created auto-comment if the same condition set no longer matches and the existing thread is still active or pending. Defaults to `false`. |
 | `fileGlob` | `fileGlob: 'any:/foo/**/*.js'` | One or more glob expressions, one per line. Each line may be prefixed with `any:`, `all:`  or `none:`. All lines are combined with AND logic. See details under [`fileGlob` matching modes](#fileglob-matching-modes). |
 | `commitExpr` | `commitExpr: '^(fix\|feat): #\d+ .*'` | A regular expression. The pull request must have at least one commit message that **does not** match this expression for the comment to be created. NB: no [flags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#advanced_searching_with_flags) are used, which means `^`, `$` and `.` **does not** match newline characters. |
 | `sourceBranch` | `sourceBranch: ^(feature\|bugfix)/\d+-[\w\-_]+$` | A regular expression. If the pull request source branch **does not** match the expression, the comment is created. |

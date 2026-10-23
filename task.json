@@ -69,7 +69,7 @@
             "label": "Auto-resolve comments",
             "defaultValue": false,
             "required": false,
-            "helpMarkDown": "(Not implemented) Toggle whether to automatically resolve previously created comments if the conditions are no longer met."
+            "helpMarkDown": "Toggle whether to automatically resolve previously created comments if the conditions are no longer met."
         }
     ],
     "execution": {
