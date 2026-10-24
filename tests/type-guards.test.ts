@@ -23,8 +23,11 @@ describe("type-guards", () => {
     });
 
     describe("#isAutoCommentThread()", () => {
-        it("should return true if object has properties.hash", () => {
-            const result = isAutoCommentThread({ properties: { hash: { $value: "foo" } } });
+        it("should return true if object has id and properties.hash", () => {
+            const result = isAutoCommentThread({
+                id: 2,
+                properties: { hash: { $value: "foo" } }
+            });
 
             expect(result).to.be.true;
         });
@@ -36,7 +39,19 @@ describe("type-guards", () => {
         });
 
         it("should return false if object has properties without hash", () => {
-            const result = isAutoCommentThread({ properties: { notHash: {} } });
+            const result = isAutoCommentThread({
+                id: 2,
+                properties: { notHash: {} }
+            });
+
+            expect(result).to.be.false;
+        });
+
+        it("should return false if object has no id", () => {
+            const result = isAutoCommentThread({
+                id: undefined,
+                properties: { hash: { $value: "foo" } }
+            });
 
             expect(result).to.be.false;
         });

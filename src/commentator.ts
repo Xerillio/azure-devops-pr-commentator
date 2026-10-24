@@ -93,13 +93,9 @@ export class Commentator implements ICommentator {
     private readonly tryResolveThread = async(
         repositoryId: string,
         prId: number,
-        thread: GitInterfaces.GitPullRequestCommentThread,
+        thread: IAutoCommentThread,
         commentHash: string
     ): Promise<boolean> => {
-        if (thread.id === undefined) {
-            return false;
-        }
-
         if (!this.isThreadOpen(thread)) {
             return false;
         }
@@ -112,13 +108,9 @@ export class Commentator implements ICommentator {
     private readonly tryReopenThread = async(
         repositoryId: string,
         prId: number,
-        thread: GitInterfaces.GitPullRequestCommentThread,
+        thread: IAutoCommentThread,
         commentHash: string
     ): Promise<boolean> => {
-        if (thread.id === undefined) {
-            return false;
-        }
-
         if (thread.status !== GitInterfaces.CommentThreadStatus.Fixed) {
             return false;
         }
