@@ -113,6 +113,33 @@ describe("Commentator", () => {
                 mockThread.id);
         });
 
+        const nonReopenableStatuses = [
+            { status: CommentThreadStatus.Closed, statusName: "Closed" },
+            { status: CommentThreadStatus.WontFix, statusName: "WontFix" },
+            { status: CommentThreadStatus.ByDesign, statusName: "ByDesign" },
+            { status: CommentThreadStatus.Unknown, statusName: "Unknown" },
+        ];
+
+        describe("should not create or reopen a same-file thread when", () => {
+            nonReopenableStatuses.forEach(({ status, statusName }) => {
+                it(`it is in status ${statusName}`, async() => {
+                    const stubGitApi = createStubGitApi();
+                    const mockThread = createMockThread({
+                        status,
+                        threadContext: { filePath: "some-file.txt" },
+                    });
+                    stubGitApi.getThreads
+                        .returns(Promise.resolve([mockThread]));
+
+                    const sut = new Commentator(createStubInputs(), stubGitApi);
+                    await sut.createComment("foo", 7357, { files: ["some-file.txt"] });
+
+                    sinon.assert.notCalled(getStubMethod(stubGitApi, "createThread"));
+                    sinon.assert.notCalled(getStubMethod(stubGitApi, "updateThread"));
+                });
+            });
+        });
+
         describe("creates a comment with content, that", () => {
             it("contains the comment from the inputs", async() => {
                 const expectedContent = "expected comment contents";
@@ -462,8 +489,10 @@ describe("Commentator", () => {
 
         const resolvedStatuses = [
             { status: CommentThreadStatus.Fixed, statusName: "Fixed" },
+            { status: CommentThreadStatus.Closed, statusName: "Closed" },
             { status: CommentThreadStatus.WontFix, statusName: "WontFix" },
             { status: CommentThreadStatus.ByDesign, statusName: "ByDesign" },
+            { status: CommentThreadStatus.Unknown, statusName: "Unknown" },
         ];
         resolvedStatuses.forEach(({status, statusName}) => {
             it(`should not update the thread if it is already in status ${statusName}`, async() => {
