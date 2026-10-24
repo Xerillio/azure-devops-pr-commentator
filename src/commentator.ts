@@ -101,7 +101,6 @@ export class Commentator implements ICommentator {
         }
 
         if (!this.isThreadOpen(thread)) {
-            console.log(`Comment with the hash: ${commentHash} is already resolved or closed.`);
             return false;
         }
 
@@ -121,7 +120,6 @@ export class Commentator implements ICommentator {
         }
 
         if (thread.status !== GitInterfaces.CommentThreadStatus.Fixed) {
-            console.log(`Comment with the hash: ${commentHash} is not in a reopenable state.`);
             return false;
         }
 
@@ -184,7 +182,6 @@ export class Commentator implements ICommentator {
             return undefined;
         }
 
-        console.log(`Adding comment thread to a file: ${context.files[0]}`);
         return { filePath: context.files[0] };
     };
 
