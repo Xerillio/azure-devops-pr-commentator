@@ -5,13 +5,15 @@ import type { IVariables } from "../src/variables";
 import type { IResultContext } from "../src/interfaces/validator";
 import type { validateAll } from "../src/validators/validator";
 
+export const STUB_INPUTS_HASH = "test hash";
+
 export const createStubInputs = (override?: Partial<IInputs>): IInputs => ({
     comment: "test comment",
     fileGlob: "test glob",
     commitExpr: "commit expression",
     sourceBranch: "source branch expression",
     autoResolve: false,
-    hashedConditions: "test hash",
+    hashedConditions: STUB_INPUTS_HASH,
     ...override
 });
 

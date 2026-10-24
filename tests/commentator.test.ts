@@ -6,7 +6,7 @@ import { Commentator } from "../src/commentator";
 import { Resources } from "../src/resources";
 import type { IAutoCommentThread } from "../src/type-guards";
 import type { IResultContext } from "../src/interfaces/validator";
-import { createStubInputs, getStubMethod } from "./stub-helper";
+import { createStubInputs, getStubMethod, STUB_INPUTS_HASH } from "./stub-helper";
 
 describe("Commentator", () => {
     describe("#createComment()", () => {
@@ -37,17 +37,13 @@ describe("Commentator", () => {
 
         it("should create new active thread if the inputs hash is unique", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    properties: {
-                        hash: {
-                            $value: "a different hash" // different from stubbed inputs
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            const mockThread = createMockThread({
+                properties: {
+                    hash: { $value: "a different hash" }
+                }
+            });
+            stubGitApi.getThreads
+                .returns(Promise.resolve([mockThread]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.createComment("foo", 7357, {});
@@ -66,17 +62,8 @@ describe("Commentator", () => {
 
         it("should be a no-op if a thread with the inputs hash already exist", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    properties: {
-                        hash: {
-                            $value: "test hash" // same as stubbed inputs
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            stubGitApi.getThreads
+                .returns(Promise.resolve([createMockThread()]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             await sut.createComment("foo", 7357, {});
@@ -87,19 +74,12 @@ describe("Commentator", () => {
 
         it("should reopen a resolved thread when it matches the same file context", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    status: CommentThreadStatus.Fixed,
-                    threadContext: { filePath: "some-file.txt" },
-                    properties: {
-                        hash: {
-                            $value: "test hash"
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            const mockThread = createMockThread({
+                status: CommentThreadStatus.Fixed,
+                threadContext: { filePath: "some-file.txt" },
+            });
+            stubGitApi.getThreads
+                .returns(Promise.resolve([mockThread]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             await sut.createComment("foo", 7357, { files: ["some-file.txt"] });
@@ -110,24 +90,16 @@ describe("Commentator", () => {
                 sinon.match({ status: CommentThreadStatus.Active }),
                 "foo",
                 7357,
-                999);
+                mockThread.id);
         });
 
         it("should create a new thread when the same hash exists only in a different file context", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    status: CommentThreadStatus.Active,
-                    threadContext: { filePath: "other-file.txt" },
-                    properties: {
-                        hash: {
-                            $value: "test hash"
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            const mockThread = createMockThread({
+                threadContext: { filePath: "other-file.txt" },
+            });
+            stubGitApi.getThreads
+                .returns(Promise.resolve([mockThread]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             await sut.createComment("foo", 7357, { files: ["some-file.txt"] });
@@ -138,7 +110,7 @@ describe("Commentator", () => {
                 sinon.match({ status: CommentThreadStatus.Fixed }),
                 "foo",
                 7357,
-                999);
+                mockThread.id);
         });
 
         describe("creates a comment with content, that", () => {
@@ -420,19 +392,13 @@ describe("Commentator", () => {
         unresolvedStatuses.forEach(({status, statusName}) => {
             it(`should resolve an existing ${statusName} auto comment with the inputs hash`, async() => {
                 const stubGitApi = createStubGitApi();
-                stubGitApi.getThreads.returns(
-                    Promise.resolve<IAutoCommentThread[]>([{
-                        id: 999,
-                        status,
-                        properties: {
-                            hash: {
-                                $value: "test hash" // same as stubbed inputs
-                            }
-                        },
-                        comments: [{ content: "not important" }]
-                    }])
-                );
-                stubGitApi.updateThread.returns(Promise.resolve({}));
+                const mockThread = createMockThread({
+                    status
+                });
+                stubGitApi.getThreads
+                    .returns(Promise.resolve([mockThread]));
+                stubGitApi.updateThread
+                    .returns(Promise.resolve({}));
 
                 const sut = new Commentator(createStubInputs(), stubGitApi);
                 const result = await sut.resolveComment("foo", 7357);
@@ -443,23 +409,19 @@ describe("Commentator", () => {
                     sinon.match({ status: CommentThreadStatus.Fixed }),
                     "foo",
                     7357,
-                    999);
+                    mockThread.id);
             });
         });
 
         it("should not update the thread if no matching auto comment exists", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    properties: {
-                        hash: {
-                            $value: "a different hash"
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            const mockThread = createMockThread({
+                properties: {
+                    hash: { $value: "a different hash" }
+                }
+            });
+            stubGitApi.getThreads
+                .returns(Promise.resolve([mockThread]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.resolveComment("foo", 7357);
@@ -470,30 +432,16 @@ describe("Commentator", () => {
 
         it("should resolve every matching auto comment with the inputs hash", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([
-                    {
-                        id: 111,
-                        status: CommentThreadStatus.Active,
-                        properties: {
-                            hash: {
-                                $value: "test hash"
-                            }
-                        },
-                        comments: [{ content: "not important" }]
-                    },
-                    {
-                        id: 222,
-                        status: CommentThreadStatus.Pending,
-                        properties: {
-                            hash: {
-                                $value: "test hash"
-                            }
-                        },
-                        comments: [{ content: "not important" }]
-                    }
-                ])
-            );
+            const mockThreads = [
+                createMockThread({
+                    status: CommentThreadStatus.Active
+                }),
+                createMockThread({
+                    status: CommentThreadStatus.Pending
+                })
+            ];
+            stubGitApi.getThreads
+                .returns(Promise.resolve(mockThreads));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.resolveComment("foo", 7357);
@@ -504,12 +452,12 @@ describe("Commentator", () => {
                 sinon.match({ status: CommentThreadStatus.Fixed }),
                 "foo",
                 7357,
-                111);
+                mockThreads[0].id);
             sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
                 sinon.match({ status: CommentThreadStatus.Fixed }),
                 "foo",
                 7357,
-                222);
+                mockThreads[1].id);
         });
 
         const resolvedStatuses = [
@@ -520,18 +468,9 @@ describe("Commentator", () => {
         resolvedStatuses.forEach(({status, statusName}) => {
             it(`should not update the thread if it is already in status ${statusName}`, async() => {
                 const stubGitApi = createStubGitApi();
-                stubGitApi.getThreads.returns(
-                    Promise.resolve<IAutoCommentThread[]>([{
-                        id: 999,
-                        status,
-                        properties: {
-                            hash: {
-                                $value: "test hash"
-                            }
-                        },
-                        comments: [{ content: "not important" }]
-                    }])
-                );
+                const mockThread = createMockThread({ status });
+                stubGitApi.getThreads
+                    .returns(Promise.resolve([mockThread]));
     
                 const sut = new Commentator(createStubInputs(), stubGitApi);
                 const result = await sut.resolveComment("foo", 7357);
@@ -543,18 +482,10 @@ describe("Commentator", () => {
 
         it("should not update the thread if its status is undefined", async() => {
             const stubGitApi = createStubGitApi();
-            stubGitApi.getThreads.returns(
-                Promise.resolve<IAutoCommentThread[]>([{
-                    id: 999,
-                    status: undefined,
-                    properties: {
-                        hash: {
-                            $value: "test hash"
-                        }
-                    },
-                    comments: [{ content: "not important" }]
-                }])
-            );
+            const mockThread = createMockThread();
+            mockThread.status = undefined;
+            stubGitApi.getThreads
+                .returns(Promise.resolve([mockThread]));
 
             const sut = new Commentator(createStubInputs(), stubGitApi);
             const result = await sut.resolveComment("foo", 7357);
@@ -591,4 +522,22 @@ function createStubGitApi(): StubbedInstance<IGitApi> {
     stubGitApi.getThreads.returns(Promise.resolve([]));
     stubGitApi.createThread.returns(Promise.resolve({}));
     return stubGitApi;
+}
+
+let mockThreadIdCounter = 1;
+
+function createMockThread(
+    override?: Partial<IAutoCommentThread>
+): IAutoCommentThread & { id: number} {
+    return {
+        id: mockThreadIdCounter++,
+        status: override?.status ?? CommentThreadStatus.Active,
+        properties: override?.properties ?? {
+            hash: {
+                $value: STUB_INPUTS_HASH
+            }
+        },
+        threadContext: override?.threadContext,
+        comments: override?.comments ?? [{ content: "some comment" }]
+    };
 }
