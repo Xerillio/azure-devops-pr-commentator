@@ -17,6 +17,7 @@ interface FileGlobEntry {
 }
 
 const FILE_GLOB_PREFIX_PATTERN = /^(any|all|none):(.*)$/;
+const MAX_PR_ITERATION_CHANGES_PER_REQUEST = 2000;
 
 export class FileGlobValidator implements IValidator {
     private readonly repositoryId: string;
@@ -113,7 +114,7 @@ export class FileGlobValidator implements IValidator {
                 this.prId,
                 lastIterationId,
                 undefined,
-                changes?.nextTop,
+                changes?.nextTop ?? MAX_PR_ITERATION_CHANGES_PER_REQUEST,
                 changes?.nextSkip);
 
             allChanges.push(...changes.changeEntries ?? []);
