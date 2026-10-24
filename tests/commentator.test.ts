@@ -85,6 +85,62 @@ describe("Commentator", () => {
             sinon.assert.notCalled(createThread);
         });
 
+        it("should reopen a resolved thread when it matches the same file context", async() => {
+            const stubGitApi = createStubGitApi();
+            stubGitApi.getThreads.returns(
+                Promise.resolve<IAutoCommentThread[]>([{
+                    id: 999,
+                    status: CommentThreadStatus.Fixed,
+                    threadContext: { filePath: "some-file.txt" },
+                    properties: {
+                        hash: {
+                            $value: "test hash"
+                        }
+                    },
+                    comments: [{ content: "not important" }]
+                }])
+            );
+
+            const sut = new Commentator(createStubInputs(), stubGitApi);
+            await sut.createComment("foo", 7357, { files: ["some-file.txt"] });
+
+            sinon.assert.notCalled(getStubMethod(stubGitApi, "createThread"));
+            sinon.assert.calledOnce(getStubMethod(stubGitApi, "updateThread"));
+            sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
+                sinon.match({ status: CommentThreadStatus.Active }),
+                "foo",
+                7357,
+                999);
+        });
+
+        it("should create a new thread when the same hash exists only in a different file context", async() => {
+            const stubGitApi = createStubGitApi();
+            stubGitApi.getThreads.returns(
+                Promise.resolve<IAutoCommentThread[]>([{
+                    id: 999,
+                    status: CommentThreadStatus.Active,
+                    threadContext: { filePath: "other-file.txt" },
+                    properties: {
+                        hash: {
+                            $value: "test hash"
+                        }
+                    },
+                    comments: [{ content: "not important" }]
+                }])
+            );
+
+            const sut = new Commentator(createStubInputs(), stubGitApi);
+            await sut.createComment("foo", 7357, { files: ["some-file.txt"] });
+
+            sinon.assert.calledOnce(getStubMethod(stubGitApi, "createThread"));
+            sinon.assert.calledOnce(getStubMethod(stubGitApi, "updateThread"));
+            sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
+                sinon.match({ status: CommentThreadStatus.Fixed }),
+                "foo",
+                7357,
+                999);
+        });
+
         describe("creates a comment with content, that", () => {
             it("contains the comment from the inputs", async() => {
                 const expectedContent = "expected comment contents";
@@ -410,6 +466,50 @@ describe("Commentator", () => {
 
             expect(result).to.be.false;
             sinon.assert.notCalled(getStubMethod(stubGitApi, "updateThread"));
+        });
+
+        it("should resolve every matching auto comment with the inputs hash", async() => {
+            const stubGitApi = createStubGitApi();
+            stubGitApi.getThreads.returns(
+                Promise.resolve<IAutoCommentThread[]>([
+                    {
+                        id: 111,
+                        status: CommentThreadStatus.Active,
+                        properties: {
+                            hash: {
+                                $value: "test hash"
+                            }
+                        },
+                        comments: [{ content: "not important" }]
+                    },
+                    {
+                        id: 222,
+                        status: CommentThreadStatus.Pending,
+                        properties: {
+                            hash: {
+                                $value: "test hash"
+                            }
+                        },
+                        comments: [{ content: "not important" }]
+                    }
+                ])
+            );
+
+            const sut = new Commentator(createStubInputs(), stubGitApi);
+            const result = await sut.resolveComment("foo", 7357);
+
+            expect(result).to.be.true;
+            sinon.assert.calledTwice(getStubMethod(stubGitApi, "updateThread"));
+            sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
+                sinon.match({ status: CommentThreadStatus.Fixed }),
+                "foo",
+                7357,
+                111);
+            sinon.assert.calledWith(getStubMethod(stubGitApi, "updateThread"),
+                sinon.match({ status: CommentThreadStatus.Fixed }),
+                "foo",
+                7357,
+                222);
         });
 
         const resolvedStatuses = [

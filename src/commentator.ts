@@ -3,6 +3,7 @@ import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
 import { COMMIT_HASH_LENGTH, MAX_COMMIT_MESSAGE_LENGTH } from "./constants";
 import type { IInputs } from "./inputs";
 import { Resources } from "./resources";
+import type { IAutoCommentThread} from "./type-guards";
 import { isAutoCommentThread } from "./type-guards";
 import type { IResultContext } from "./interfaces/validator";
 
@@ -16,14 +17,14 @@ export class Commentator implements ICommentator {
         const commentHash = this.inputs.hashedConditions;
 
         const prThreads = await this.client.getThreads(repositoryId, prId);
-        const existingThread = prThreads.filter(isAutoCommentThread)
-            .find(thread => thread.isDeleted !== true && thread.properties.hash.$value === commentHash);
+        const matchingThreads = prThreads.filter(isAutoCommentThread)
+            .filter(thread => thread.isDeleted !== true && thread.properties.hash.$value === commentHash);
 
-        if (existingThread === undefined) {
+        const wasExistingThreadHandled =
+            await this.handleReopeningThread(repositoryId, prId, context, commentHash, matchingThreads);
+
+        if (!wasExistingThreadHandled) {
             await this.createNewThread(commentHash, repositoryId, prId, context);
-            console.log(`New comment created with the hash: ${commentHash}`);
-        } else {
-            console.log(`A comment already exists with the hash: ${commentHash}`);
         }
 
         return commentHash;
@@ -33,31 +34,127 @@ export class Commentator implements ICommentator {
         const commentHash = this.inputs.hashedConditions;
 
         const prThreads = await this.client.getThreads(repositoryId, prId);
-        const existingThread = prThreads.filter(isAutoCommentThread)
-            .find(thread => thread.isDeleted !== true && thread.properties.hash.$value === commentHash);
+        const matchingThreads = prThreads.filter(isAutoCommentThread)
+            .filter(thread => thread.isDeleted !== true && thread.properties.hash.$value === commentHash);
 
-        if (existingThread?.id === undefined) {
+        if (matchingThreads.length === 0) {
             console.log(`There was no existing comment with the hash: ${commentHash}`);
             return false;
         }
 
-        const threadStatus = existingThread.status ?? GitInterfaces.CommentThreadStatus.Unknown;
-        const isOpenThread = threadStatus === GitInterfaces.CommentThreadStatus.Active ||
-            threadStatus === GitInterfaces.CommentThreadStatus.Pending;
+        const resolvingResults = await Promise.all(
+            matchingThreads.map(thread => this.tryResolveThread(repositoryId, prId, thread, commentHash))
+        );
 
-        if (!isOpenThread) {
+        return resolvingResults.some(Boolean);
+    };
+
+    /**
+     * Attempts to reopening an existing thread matching the new result context. Returns true, if a
+     * thread was reopened or it was in a status not allowing automatic reopening (e.g. WontFix).
+     * Otherwise, it returns false, indicating a new thread should be created.
+     */
+    private readonly handleReopeningThread = async(
+        repositoryId: string,
+        prId: number,
+        context: IResultContext,
+        commentHash: string,
+        matchingThreads: IAutoCommentThread[]
+    ): Promise<boolean> => {
+        const newThreadContext = this.createThreadContext(context);
+        const sameContextThreads = matchingThreads.filter(thread => this.isSameThreadContext(thread, newThreadContext));
+        const differentContextThreads = matchingThreads.filter(thread => !this.isSameThreadContext(thread, newThreadContext));
+
+        await Promise.all(
+            differentContextThreads.map(thread => this.tryResolveThread(repositoryId, prId, thread, commentHash))
+        );
+
+        const hasActiveThread = sameContextThreads.some(thread => this.isThreadOpen(thread));
+        if (hasActiveThread) {
+            console.log(`An open comment already exists with the hash: ${commentHash}`);
+            return true;
+        }
+
+        const reopeningResults = await Promise.all(
+            sameContextThreads.map(thread => this.tryReopenThread(repositoryId, prId, thread, commentHash))
+        );
+        if (reopeningResults.some(Boolean)) {
+            return true;
+        }
+
+        if (sameContextThreads.length !== 0) {
+            console.log(`A comment with the hash: ${commentHash} already exists in a non-reopenable state.`);
+            return true;
+        }
+
+        return false;
+    };
+
+    private readonly tryResolveThread = async(
+        repositoryId: string,
+        prId: number,
+        thread: GitInterfaces.GitPullRequestCommentThread,
+        commentHash: string
+    ): Promise<boolean> => {
+        if (thread.id === undefined) {
+            return false;
+        }
+
+        if (!this.isThreadOpen(thread)) {
             console.log(`Comment with the hash: ${commentHash} is already resolved or closed.`);
             return false;
         }
 
-        const resolvedThread: GitInterfaces.GitPullRequestCommentThread = {
-            id: existingThread.id,
-            status: GitInterfaces.CommentThreadStatus.Fixed
-        };
-
-        await this.client.updateThread(resolvedThread, repositoryId, prId, existingThread.id);
+        await this.updateThreadStatus(repositoryId, prId, thread.id, GitInterfaces.CommentThreadStatus.Fixed);
         console.log(`Resolved comment with the hash: ${commentHash}`);
         return true;
+    };
+
+    private readonly tryReopenThread = async(
+        repositoryId: string,
+        prId: number,
+        thread: GitInterfaces.GitPullRequestCommentThread,
+        commentHash: string
+    ): Promise<boolean> => {
+        if (thread.id === undefined) {
+            return false;
+        }
+
+        if (thread.status !== GitInterfaces.CommentThreadStatus.Fixed) {
+            console.log(`Comment with the hash: ${commentHash} is not in a reopenable state.`);
+            return false;
+        }
+
+        await this.updateThreadStatus(repositoryId, prId, thread.id, GitInterfaces.CommentThreadStatus.Active);
+        console.log(`Reopened comment with the hash: ${commentHash}`);
+        return true;
+    };
+
+    private readonly updateThreadStatus = async(
+        repositoryId: string,
+        prId: number,
+        threadId: number,
+        status: GitInterfaces.CommentThreadStatus
+    ): Promise<void> => {
+        const updatedThread: GitInterfaces.GitPullRequestCommentThread = {
+            id: threadId,
+            status
+        };
+
+        await this.client.updateThread(updatedThread, repositoryId, prId, threadId);
+    };
+
+    private readonly isThreadOpen = (thread: GitInterfaces.GitPullRequestCommentThread): boolean => {
+        const threadStatus = thread.status ?? GitInterfaces.CommentThreadStatus.Unknown;
+        return threadStatus === GitInterfaces.CommentThreadStatus.Active ||
+            threadStatus === GitInterfaces.CommentThreadStatus.Pending;
+    };
+
+    private readonly isSameThreadContext = (
+        thread: GitInterfaces.GitPullRequestCommentThread,
+        newThreadContext: GitInterfaces.CommentThreadContext | undefined
+    ): boolean => {
+        return thread.threadContext?.filePath === newThreadContext?.filePath;
     };
 
     private readonly createNewThread = async(
@@ -65,7 +162,7 @@ export class Commentator implements ICommentator {
         repositoryId: string,
         prId: number,
         context: IResultContext
-    ): Promise<GitInterfaces.GitPullRequestCommentThread> => {
+    ): Promise<void> => {
         const thread: GitInterfaces.GitPullRequestCommentThread = {
             properties: {
                 hash: commentHash
@@ -78,7 +175,8 @@ export class Commentator implements ICommentator {
             threadContext: this.createThreadContext(context)
         };
 
-        return await this.client.createThread(thread, repositoryId, prId);
+        await this.client.createThread(thread, repositoryId, prId);
+        console.log(`New comment created with the hash: ${commentHash}`);
     };
 
     private readonly createThreadContext = (context: IResultContext): GitInterfaces.CommentThreadContext | undefined => {
