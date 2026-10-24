@@ -13,10 +13,12 @@ export interface IHasId<TId> {
 }
 
 export function isAutoCommentThread(obj: GitInterfaces.GitPullRequestCommentThread): obj is IAutoCommentThread {
-    return obj.properties?.hash !== undefined;
+    return obj.id !== undefined
+        && obj.properties?.hash !== undefined;
 }
 
 export interface IAutoCommentThread extends GitInterfaces.GitPullRequestCommentThread {
+    id: number
     properties: IAutoCommentThreadProperties
 }
 
